@@ -3,7 +3,7 @@ import {useEffect,useMemo,useState} from "react";
 import {createClient, type User} from "@supabase/supabase-js";
 
 const SUPABASE_URL="https://iyfyghzqlcwzyjuqxjlu.supabase.co";
-const SUPABASE_KEY="YOUR_SUPABASE_PUBLISHABLE_KEY";
+const SUPABASE_KEY="sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE";
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
 
 type Product=any; type CartLine={product:Product,size:string,quantity:number}; type Address=any; type Order=any;
