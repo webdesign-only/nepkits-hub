@@ -446,7 +446,7 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  const heroImage = banner?.image_url || productImage(featured[0] || products[0]);
+  const heroImage = banner?.image_url || productImage(featured[0] || products[0]) || "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1800&q=90";
   const heroSubtitle =
     banner?.subtitle ||
     settings?.tagline ||
@@ -493,7 +493,7 @@ export default function Home() {
           <>
             <section className="hero-editorial">
               <div className="hero-media">
-                <img src={heroImage || "/placeholder.jpg"} alt="NEPKITS HUB football fashion" />
+                <img src={heroImage} alt="NEPKITS HUB football fashion" />
                 <div className="hero-vignette" />
               </div>
               <div className="site-shell hero-content">
@@ -594,7 +594,7 @@ export default function Home() {
                   <button className="fashion-btn dark-fill" onClick={() => go("shop")}>Explore the collection</button>
                 </div>
                 <div className="feature-photo">
-                  <img src={productImage(products.find((product) => product.bestseller) || products[1])} alt="NEPKITS HUB supporter style" loading="lazy" />
+                  <img src={productImage(products.find((product) => product.bestseller) || products[1]) || "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?auto=format&fit=crop&w=1400&q=88"} alt="NEPKITS HUB supporter style" loading="lazy" />
                 </div>
               </div>
             </section>
