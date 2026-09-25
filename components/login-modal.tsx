@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
-import {createClient} from '@supabase/supabase-js';
 import NepkitsBrand from './nepkits-brand';
+import { supabase } from '../lib/supabase-browser';
 
 const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
 
