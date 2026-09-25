@@ -448,3 +448,50 @@ html,body{overflow-x:hidden}
   .cart-drawer-head{padding:17px 16px 14px}.cart-drawer-head h2{font-size:27px}.cart-drawer-items{padding:11px 10px 5px}.cart-drawer-item{grid-template-columns:76px 1fr;padding:8px}.cart-drawer-thumb{width:76px;height:92px}.cart-drawer-name{font-size:11px}.cart-drawer-row strong{font-size:12px}.cart-drawer-foot{padding:11px 12px 14px}
 }
 @keyframes cartUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+
+/* NEPKITS BRAND SYSTEM — replaces fragile image logo sections */
+.nepkits-brand{display:inline-flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:inherit;line-height:1}
+.nepkits-brand-mark{position:relative;display:grid;place-items:center;flex:0 0 auto;width:48px;height:48px;background:#e31b23;color:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(227,27,35,.25);overflow:hidden}
+.nepkits-brand-mark::before{content:'';position:absolute;inset:6px;border:1px solid rgba(255,255,255,.42);border-radius:6px}
+.nepkits-brand-mark::after{content:'•';position:absolute;right:6px;bottom:3px;color:#d8a93c;font-size:14px}
+.nepkits-brand-mark span{position:relative;z-index:1;font-size:25px;font-weight:950;letter-spacing:-.08em;transform:skew(-6deg)}
+.nepkits-brand-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.nepkits-brand-copy strong{font-size:18px;font-weight:950;letter-spacing:.075em;color:#fff;white-space:nowrap}
+.nepkits-brand-copy em{font-style:normal;font-size:11px;font-weight:950;letter-spacing:.34em;color:#e31b23;margin-top:3px;white-space:nowrap}
+.nepkits-brand-copy small{font-size:5px;font-weight:800;letter-spacing:.2em;color:rgba(255,255,255,.55);margin-top:5px;white-space:nowrap}
+.nepkits-brand-compact{gap:8px}
+.nepkits-brand-compact .nepkits-brand-mark{width:36px;height:36px;border-radius:8px}
+.nepkits-brand-compact .nepkits-brand-mark span{font-size:19px}
+.nepkits-brand-compact .nepkits-brand-copy strong{font-size:14px}
+.nepkits-brand-compact .nepkits-brand-copy em{font-size:8px;letter-spacing:.28em;margin-top:2px}
+.nepkits-brand-compact .nepkits-brand-copy small{display:none}
+.nepkits-brand-footer{gap:9px}
+.nepkits-brand-footer .nepkits-brand-mark{width:42px;height:42px}
+.nepkits-brand-footer .nepkits-brand-copy strong{font-size:16px}
+.nepkits-brand-footer .nepkits-brand-copy em{font-size:9px}
+.nepkits-brand-footer .nepkits-brand-copy small{color:#8b8780}
+.nepkits-brand-loader{justify-content:center;gap:11px}
+.nepkits-brand-loader .nepkits-brand-mark{width:58px;height:58px;border-radius:13px}
+.nepkits-brand-loader .nepkits-brand-mark span{font-size:30px}
+.nepkits-brand-loader .nepkits-brand-copy strong{font-size:23px}
+.nepkits-brand-loader .nepkits-brand-copy em{font-size:12px}
+.nepkits-brand-loader .nepkits-brand-copy small{color:rgba(255,255,255,.52)}
+.market-logo{display:flex;align-items:center;min-width:0;height:58px}
+.market-logo .nepkits-brand{max-width:100%}
+.mobile-brand .nepkits-brand{max-width:150px}
+.login-popover-brand,.auth-brand{display:inline-flex;align-items:center;color:#151515;text-decoration:none}
+.login-popover-brand .nepkits-brand-copy strong,.auth-brand .nepkits-brand-copy strong{color:#151515}
+.login-popover-brand .nepkits-brand-copy small,.auth-brand .nepkits-brand-copy small{color:#77736b}
+.footer-grid>div:first-child .nepkits-brand{margin-bottom:10px}
+.footer-brand .nepkits-brand-copy strong{color:#151515}
+.footer-brand .nepkits-brand-copy small{color:#77736b}
+@media(max-width:767px){
+  .market-logo{height:42px;width:auto;flex:0 0 auto}
+  .market-logo .nepkits-brand-mark{width:34px;height:34px;border-radius:8px}
+  .market-logo .nepkits-brand-mark span{font-size:18px}
+  .market-logo .nepkits-brand-copy strong{font-size:13px}
+  .market-logo .nepkits-brand-copy em{font-size:7px;letter-spacing:.25em}
+  .mobile-brand .nepkits-brand-copy small{display:none}
+  .mobile-brand .nepkits-brand-mark{width:34px;height:34px}
+}
