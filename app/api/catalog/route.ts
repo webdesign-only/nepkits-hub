@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase=createClient(
   'https://iyfyghzqlcwzyjuqxjlu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZnlnbHpxbGN3enlqdXF4amx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMzQzMjgsImV4cCI6MjEwNTkxMDMyOH0.w8B4QgZM1NytGm709lc-Aui5x-DV5VjTzW8JJDVIzr4'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZnlnaHpxbGN3enlqdXF4amx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMzQzMjgsImV4cCI6MjEwNTkxMDMyOH0.w8B4QgZM1NytGm709lc-Aui5x-DV5VjTzW8JJDVIzr4'
 );
 
 async function loadProduct(product:any){
