@@ -19,8 +19,8 @@ img{max-width:100%;display:block}
 .announcement-right{opacity:.6}
 .site-header{position:sticky;top:0;z-index:40;background:rgba(247,246,242,.93);backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,0,0,.08)}
 .header-inner{min-height:78px;display:flex;align-items:center;gap:26px}
-.brand-mark{appearance:none;border:0;background:transparent;padding:0;font:900 22px/1 Manrope,Arial,sans-serif;letter-spacing:-.07em;color:var(--ink);white-space:nowrap}
-.brand-mark span{font-weight:900}.brand-mark em{font-style:normal;font-weight:600;color:var(--muted)}
+.brand-mark{appearance:none;border:0;background:transparent;padding:0;color:var(--ink);white-space:nowrap}
+.logo-brand{display:flex;align-items:center}.logo-brand img{display:block;width:128px;height:46px;object-fit:contain;object-position:left center}.footer-brand img{width:168px;height:auto}
 .main-nav{display:flex;align-items:center;justify-content:center;gap:20px;flex:1}
 .nav-link,.icon-action{appearance:none;border:0;background:transparent;color:var(--ink);font-weight:700;font-size:13px;padding:10px 2px}
 .nav-link:hover,.icon-action:hover,.text-link:hover{opacity:.62}
