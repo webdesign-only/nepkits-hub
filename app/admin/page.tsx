@@ -36,6 +36,7 @@ export default function AdminPage() {
   const [editing, setEditing] = useState<any>(null);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [reply, setReply] = useState("");
+  const [proofUrl, setProofUrl] = useState("");
   const [newCategory, setNewCategory] = useState({ name: "", description: "" });
   const [settingsDraft, setSettingsDraft] = useState<any>(null);
   const [bannerDraft, setBannerDraft] = useState<any>(null);
@@ -170,6 +171,20 @@ export default function AdminPage() {
     }
     await loadAll();
     notify("Product removed.");
+  }
+
+  async function viewPaymentProof(payment: any) {
+    const path = payment?.metadata?.screenshot_path;
+    if (!path) {
+      notify("No payment screenshot is attached.");
+      return;
+    }
+    const { data, error } = await supabase.storage.from("private-documents").createSignedUrl(path, 300);
+    if (error || !data?.signedUrl) {
+      notify(error?.message || "Payment proof could not be opened.");
+      return;
+    }
+    setProofUrl(data.signedUrl);
   }
 
   async function setPayment(order: any, payment: any, status: string) {
@@ -443,6 +458,7 @@ export default function AdminPage() {
                     <div className="admin-payment-line">
                       <span className="admin-pill">{o.payment_method} · {o.payment_status}</span>
                       {o.payments?.[0]?.provider_transaction_id ? <small>Ref: {o.payments[0].provider_transaction_id}</small> : null}
+                      {o.payments?.[0]?.metadata?.screenshot_path ? <button className="proof-link" onClick={() => viewPaymentProof(o.payments[0])}>View proof</button> : null}
                       {o.payments?.[0] && <div className="admin-payment-actions"><button onClick={() => setPayment(o, o.payments[0], "paid")}>Verify</button><button onClick={() => setPayment(o, o.payments[0], "failed")}>Reject</button></div>}
                     </div><div className="admin-order-footer"><select className="fashion-select compact" value={o.order_status} onChange={(e) => setOrderStatus(o.id, e.target.value)}>{ORDER_STATUSES.map((s) => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select></div>
                   </article>
@@ -539,6 +555,7 @@ export default function AdminPage() {
           </div>
         )}
 
+        {proofUrl && <div className="admin-modal" onMouseDown={(e) => { if (e.currentTarget === e.target) setProofUrl(""); }}><div className="admin-proof-card"><div className="admin-panel-head"><div><div className="eyebrow">Payment verification</div><h2>Payment screenshot</h2></div><button onClick={() => setProofUrl("")}>Close</button></div><img src={proofUrl} alt="Customer payment proof" /></div></div>}
         {message && <div className="toast">{message}</div>}
       </main>
     </div>
