@@ -466,9 +466,7 @@ export default function Home() {
           <button className="mobile-menu-btn" onClick={() => setMenuOpen((current) => !current)} aria-label="Menu">
             ☰
           </button>
-          <button className="brand-mark" onClick={() => go("shop")} aria-label="NEPKITS HUB home">
-            <span>NEP</span>KITS <em>HUB</em>
-          </button>
+          <button className="brand-mark logo-brand" onClick={() => go("shop")} aria-label="NEPKITS HUB home"><img src="/nepkits-logo.webp" alt="NEPKITS HUB" /></button>
 
           <nav className={"main-nav " + (menuOpen ? "open" : "")}>
             <button className="nav-link" onClick={() => go("shop")}>New Arrivals</button>
@@ -787,7 +785,7 @@ export default function Home() {
       <footer className="site-footer">
         <div className="site-shell footer-grid">
           <div>
-            <button className="brand-mark footer-brand" onClick={() => go("shop")}><span>NEP</span>KITS <em>HUB</em></button>
+            <button className="brand-mark logo-brand footer-brand" onClick={() => go("shop")}><img src="/nepkits-logo.webp" alt="NEPKITS HUB" /></button>
             <p>Football culture. Premium jerseys. Built for fans.</p>
           </div>
           <div><div className="footer-label">Shop</div><button onClick={() => go("shop")}>New arrivals</button><button onClick={() => go("shop")}>Best sellers</button><button onClick={() => go("shop")}>Sale</button></div>
