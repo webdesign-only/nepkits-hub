@@ -3,8 +3,6 @@ import {useEffect,useState} from 'react';
 import NepkitsBrand from './nepkits-brand';
 import { supabase } from '../lib/supabase-browser';
 
-const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
-
 export default function LoginModal(){
  const [open,setOpen]=useState(false);
  const [signup,setSignup]=useState(false);
