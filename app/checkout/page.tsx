@@ -459,7 +459,7 @@ export default function Checkout() {
                 </strong>
               </div>
               <div className="checkout-summary-total">
-                <span>ITEM TOTAL</span>
+                <span>MERCHANDISE</span>
                 <strong>{money(subtotal)}</strong>
               </div>
             </div>
