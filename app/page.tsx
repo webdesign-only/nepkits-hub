@@ -1,131 +1,859 @@
 "use client";
-import {useEffect,useMemo,useState} from "react";
-import {createClient, type User} from "@supabase/supabase-js";
 
-const SUPABASE_URL="https://iyfyghzqlcwzyjuqxjlu.supabase.co";
-const SUPABASE_KEY="sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE";
-const supabase=createClient(SUPABASE_URL,SUPABASE_KEY);
+import { useEffect, useMemo, useState } from "react";
+import { createClient, type User } from "@supabase/supabase-js";
 
-type Product=any; type CartLine={product:Product,size:string,quantity:number}; type Address=any; type Order=any;
-const money=(n:number|string)=>new Intl.NumberFormat("en-NP",{style:"currency",currency:"NPR",maximumFractionDigits:0}).format(Number(n));
+const SUPABASE_URL = "https://iyfyghzqlcwzyjuqxjlu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-export default function Home(){
-  const [tab,setTab]=useState("shop"); const [products,setProducts]=useState<Product[]>([]); const [categories,setCategories]=useState<any[]>([]);
-  const [user,setUser]=useState<User|null>(null); const [role,setRole]=useState("customer"); const [addresses,setAddresses]=useState<Address[]>([]);
-  const [zones,setZones]=useState<any[]>([]); const [orders,setOrders]=useState<Order[]>([]); const [selected,setSelected]=useState<Product|null>(null);
-  const [cart,setCart]=useState<CartLine[]>([]); const [q,setQ]=useState(""); const [cat,setCat]=useState(""); const [authMode,setAuthMode]=useState<"login"|"signup">("login");
-  const [authOpen,setAuthOpen]=useState(false); const [email,setEmail]=useState(""); const [password,setPassword]=useState(""); const [fullName,setFullName]=useState("");
-  const [message,setMessage]=useState(""); const [addressForm,setAddressForm]=useState({full_name:"",phone:"",address_text:"",area:"",city:"Pokhara",delivery_instructions:""});
-  const [zoneId,setZoneId]=useState(""); const [payment,setPayment]=useState("cod"); const [busy,setBusy]=useState(false);
-  const [wishlist,setWishlist]=useState<string[]>([]); const [adminProducts,setAdminProducts]=useState<Product[]>([]); const [adminOrders,setAdminOrders]=useState<Order[]>([]);
-  const [newProduct,setNewProduct]=useState({name:"",slug:"",sku:"",description:"",category_id:"",price:"",original_price:"",image_url:"",team:"NEPKITS",season:"2026"});
-  const [review,setReview]=useState({rating:5,review:""}); const [supportText,setSupportText]=useState(""); const [supportOpen,setSupportOpen]=useState(false);
+type Product = any;
+type CartLine = { product: Product; size: string; quantity: number };
+type Address = any;
+type Order = any;
 
-  useEffect(()=>{const c=localStorage.getItem("nk-cart"); if(c) setCart(JSON.parse(c)); loadPublic(); supabase.auth.getSession().then(({data})=>{setUser(data.session?.user??null); if(data.session?.user) loadUser(data.session.user);}); const {data:sub}=supabase.auth.onAuthStateChange((_e,s)=>{setUser(s?.user??null); if(s?.user) loadUser(s.user);}); return()=>sub.subscription.unsubscribe();},[]);
-  useEffect(()=>localStorage.setItem("nk-cart",JSON.stringify(cart)),[cart]);
-  async function loadPublic(){
-    const [p,c,z]=await Promise.all([
-      supabase.from("products").select("*,category:categories(name,slug),images:product_images(url,is_primary,sort_order),sizes:product_sizes(id,size,stock_qty,sort_order)").eq("published",true).order("featured",{ascending:false}).order("created_at",{ascending:false}),
-      supabase.from("categories").select("id,name,slug").eq("is_active",true).order("sort_order"),
-      supabase.from("delivery_zones").select("*").eq("active",true).order("name")
+const money = (n: number | string) =>
+  new Intl.NumberFormat("en-NP", {
+    style: "currency",
+    currency: "NPR",
+    maximumFractionDigits: 0,
+  }).format(Number(n));
+
+const productImage = (product: Product) =>
+  product?.images?.find((image: any) => image.is_primary)?.url ??
+  product?.images?.[0]?.url ??
+  "";
+
+export default function Home() {
+  const [tab, setTab] = useState("shop");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [banner, setBanner] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState("customer");
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [zones, setZones] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selected, setSelected] = useState<Product | null>(null);
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("");
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authOpen, setAuthOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [message, setMessage] = useState("");
+  const [addressForm, setAddressForm] = useState({
+    full_name: "",
+    phone: "",
+    address_text: "",
+    area: "",
+    city: "Pokhara",
+    delivery_instructions: "",
+  });
+  const [zoneId, setZoneId] = useState("");
+  const [payment, setPayment] = useState("cod");
+  const [busy, setBusy] = useState(false);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [adminOrders, setAdminOrders] = useState<Order[]>([]);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    slug: "",
+    sku: "",
+    description: "",
+    category_id: "",
+    price: "",
+    original_price: "",
+    image_url: "",
+    team: "NEPKITS",
+    season: "2026",
+  });
+  const [review, setReview] = useState({ rating: 5, review: "" });
+  const [supportText, setSupportText] = useState("");
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem("nk-cart");
+    if (savedCart) setCart(JSON.parse(savedCart));
+    loadPublic();
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+      if (data.session?.user) loadUser(data.session.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) loadUser(session.user);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("nk-cart", JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    if (!message) return;
+    const timeout = window.setTimeout(() => setMessage(""), 3200);
+    return () => window.clearTimeout(timeout);
+  }, [message]);
+
+  async function loadPublic() {
+    const [p, c, z, b, s] = await Promise.all([
+      supabase
+        .from("products")
+        .select(
+          "*,category:categories(name,slug),images:product_images(url,is_primary,sort_order),sizes:product_sizes(id,size,stock_qty,sort_order)",
+        )
+        .eq("published", true)
+        .order("featured", { ascending: false })
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("categories")
+        .select("id,name,slug,description,sort_order")
+        .eq("is_active", true)
+        .order("sort_order"),
+      supabase.from("delivery_zones").select("*").eq("active", true).order("name"),
+      supabase
+        .from("homepage_banners")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order")
+        .limit(1)
+        .maybeSingle(),
+      supabase.from("store_settings").select("*").limit(1).maybeSingle(),
     ]);
-    setProducts(p.data??[]); setCategories(c.data??[]); setZones(z.data??[]); if(z.data?.[0]) setZoneId(z.data[0].id);
+
+    setProducts(p.data ?? []);
+    setCategories(c.data ?? []);
+    setZones(z.data ?? []);
+    setBanner(b.data ?? null);
+    setSettings(s.data ?? null);
+    if (z.data?.[0]) setZoneId(z.data[0].id);
   }
-  async function loadUser(u:User){
-    const [p,a,o,w]=await Promise.all([
-      supabase.from("profiles").select("full_name,role").eq("id",u.id).maybeSingle(),
-      supabase.from("addresses").select("*").eq("user_id",u.id).order("created_at",{ascending:false}),
-      supabase.from("orders").select("*,order_items(*)").eq("user_id",u.id).order("created_at",{ascending:false}),
-      supabase.from("wishlists").select("product_id").eq("user_id",u.id)
+
+  async function loadUser(u: User) {
+    const [p, a, o, w] = await Promise.all([
+      supabase.from("profiles").select("full_name,role").eq("id", u.id).maybeSingle(),
+      supabase.from("addresses").select("*").eq("user_id", u.id).order("created_at", { ascending: false }),
+      supabase.from("orders").select("*,order_items(*)").eq("user_id", u.id).order("created_at", { ascending: false }),
+      supabase.from("wishlists").select("product_id").eq("user_id", u.id),
     ]);
-    const r=p.data?.role??"customer"; setRole(r); setAddresses(a.data??[]); setOrders(o.data??[]); setWishlist((w.data??[]).map((x:any)=>x.product_id));
-    if(a.data?.[0]){setAddressForm({full_name:a.data[0].full_name,phone:a.data[0].phone,address_text:a.data[0].address_text,area:a.data[0].area,city:a.data[0].city,delivery_instructions:a.data[0].delivery_instructions??""});}
-    if(r==="admin") loadAdmin();
+
+    const r = p.data?.role ?? "customer";
+    setRole(r);
+    setAddresses(a.data ?? []);
+    setOrders(o.data ?? []);
+    setWishlist((w.data ?? []).map((x: any) => x.product_id));
+
+    if (a.data?.[0]) {
+      setAddressForm({
+        full_name: a.data[0].full_name,
+        phone: a.data[0].phone,
+        address_text: a.data[0].address_text,
+        area: a.data[0].area,
+        city: a.data[0].city,
+        delivery_instructions: a.data[0].delivery_instructions ?? "",
+      });
+    }
+    if (r === "admin") loadAdmin();
   }
-  async function loadAdmin(){
-    const [p,o]=await Promise.all([
-      supabase.from("products").select("*,category:categories(name)").order("created_at",{ascending:false}),
-      supabase.from("orders").select("*,order_items(*)").order("created_at",{ascending:false}).limit(100)
+
+  async function loadAdmin() {
+    const [, o] = await Promise.all([
+      supabase.from("products").select("*,category:categories(name)").order("created_at", { ascending: false }),
+      supabase.from("orders").select("*,order_items(*)").order("created_at", { ascending: false }).limit(100),
     ]);
-    setAdminProducts(p.data??[]); setAdminOrders(o.data??[]);
+    setAdminOrders(o.data ?? []);
   }
-  const filtered=useMemo(()=>products.filter(p=>(!q||[p.name,p.team,p.player,p.season,p.league].filter(Boolean).join(" ").toLowerCase().includes(q.toLowerCase()))&&(!cat||p.category_id===cat)),[products,q,cat]);
-  const subtotal=useMemo(()=>cart.reduce((s,x)=>s+Number(x.product.price)*x.quantity,0),[cart]);
-  function add(product:Product,size:string,qty:number){setCart(v=>{const i=v.findIndex(x=>x.product.id===product.id&&x.size===size); if(i>=0){const n=[...v];n[i]={...n[i],quantity:n[i].quantity+qty};return n;} return [...v,{product,size,quantity:qty}]}); setMessage("Added to cart.");}
-  function remove(id:string,size:string){setCart(v=>v.filter(x=>!(x.product.id===id&&x.size===size)))}
-  function clearCart(){setCart([]);}
-  async function auth(){
-    setBusy(true);setMessage("");
-    const result=authMode==="login"?await supabase.auth.signInWithPassword({email,password}):await supabase.auth.signUp({email,password,options:{data:{full_name:fullName}}});
+
+  const filtered = useMemo(
+    () =>
+      products.filter(
+        (p) =>
+          (!q ||
+            [p.name, p.team, p.player, p.season, p.league, p.category?.name]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase()
+              .includes(q.toLowerCase())) &&
+          (!cat || p.category_id === cat),
+      ),
+    [products, q, cat],
+  );
+
+  const latest = products.filter((p) => p.new_arrival);
+  const featured = products.filter((p) => p.featured);
+  const best = [...products]
+    .sort((a, b) => Number(b.sold_count || 0) - Number(a.sold_count || 0))
+    .slice(0, 6);
+  const sale = products.filter((p) => Number(p.discount_percent || 0) > 0);
+  const subtotal = useMemo(
+    () => cart.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0),
+    [cart],
+  );
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  function add(product: Product, size?: string, qty = 1) {
+    const chosenSize =
+      size ??
+      product.sizes?.find((item: any) => Number(item.stock_qty) > 0)?.size ??
+      "M";
+    setCart((current) => {
+      const index = current.findIndex(
+        (item) => item.product.id === product.id && item.size === chosenSize,
+      );
+      if (index >= 0) {
+        const next = [...current];
+        next[index] = { ...next[index], quantity: next[index].quantity + qty };
+        return next;
+      }
+      return [...current, { product, size: chosenSize, quantity: qty }];
+    });
+    setMessage("Added to bag.");
+  }
+
+  function remove(id: string, size: string) {
+    setCart((current) => current.filter((item) => !(item.product.id === id && item.size === size)));
+  }
+
+  async function auth() {
+    setBusy(true);
+    setMessage("");
+    const result =
+      authMode === "login"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: fullName } },
+          });
+
     setBusy(false);
-    if(result.error){setMessage(result.error.message);return}
-    setAuthOpen(false);setMessage(authMode==="signup"?"Account created. Check your email if confirmation is enabled.":"Signed in.");
+    if (result.error) {
+      setMessage(result.error.message);
+      return;
+    }
+    setAuthOpen(false);
+    setMessage(authMode === "signup" ? "Account created. Check your email if confirmation is enabled." : "Signed in.");
   }
-  async function signOut(){await supabase.auth.signOut();setRole("customer");setOrders([]);setAddresses([]);setWishlist([]);setTab("shop");}
-  async function saveAddress(e:any){
-    e.preventDefault(); if(!user){setAuthOpen(true);return}
-    const {data,error}=await supabase.from("addresses").insert({...addressForm,user_id:user.id,is_default:addresses.length===0}).select().single();
-    if(error){setMessage(error.message);return} setAddresses(v=>[data,...v]);setMessage("Address saved.");
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    setRole("customer");
+    setOrders([]);
+    setAddresses([]);
+    setWishlist([]);
+    setTab("shop");
   }
-  async function checkout(){
-    if(!user){setMessage("Please sign in before checkout.");setAuthOpen(true);return}
-    if(!addresses[0]){setTab("account");setMessage("Save a delivery address first.");return}
-    if(!zoneId){setMessage("Select an active delivery zone.");return}
-    const items=cart.map(x=>({product_id:x.product.id,size:x.size,quantity:x.quantity}));
-    setBusy(true);setMessage("");
-    const {data,error}=await supabase.rpc("place_order",{p_user_id:user.id,p_items:items,p_address_id:addresses[0].id,p_delivery_zone_id:zoneId,p_payment_method:payment,p_coupon_code:null});
+
+  async function saveAddress(event: any) {
+    event.preventDefault();
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("addresses")
+      .insert({ ...addressForm, user_id: user.id, is_default: addresses.length === 0 })
+      .select()
+      .single();
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setAddresses((current) => [data, ...current]);
+    setMessage("Address saved.");
+  }
+
+  async function checkout() {
+    if (!user) {
+      setMessage("Please sign in before checkout.");
+      setAuthOpen(true);
+      return;
+    }
+    if (!addresses[0]) {
+      setTab("account");
+      setMessage("Save a delivery address first.");
+      return;
+    }
+    if (!zoneId) {
+      setMessage("Select an active delivery zone.");
+      return;
+    }
+
+    setBusy(true);
+    const { data, error } = await supabase.rpc("place_order", {
+      p_user_id: user.id,
+      p_items: cart.map((item) => ({
+        product_id: item.product.id,
+        size: item.size,
+        quantity: item.quantity,
+      })),
+      p_address_id: addresses[0].id,
+      p_delivery_zone_id: zoneId,
+      p_payment_method: payment,
+      p_coupon_code: null,
+    });
     setBusy(false);
-    if(error){setMessage(error.message);return}
-    clearCart();await loadUser(user);setTab("orders");setMessage("Order "+data.order_number+" created.");
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setCart([]);
+    await loadUser(user);
+    setTab("orders");
+    setMessage("Order " + data.order_number + " created.");
   }
-  async function toggleWish(p:Product){
-    if(!user){setAuthOpen(true);return}
-    if(wishlist.includes(p.id)){await supabase.from("wishlists").delete().eq("user_id",user.id).eq("product_id",p.id);setWishlist(v=>v.filter(x=>x!==p.id));}
-    else {await supabase.from("wishlists").insert({user_id:user.id,product_id:p.id});setWishlist(v=>[...v,p.id]);}
+
+  async function toggleWish(product: Product) {
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
+    if (wishlist.includes(product.id)) {
+      await supabase.from("wishlists").delete().eq("user_id", user.id).eq("product_id", product.id);
+      setWishlist((current) => current.filter((id) => id !== product.id));
+    } else {
+      await supabase.from("wishlists").insert({ user_id: user.id, product_id: product.id });
+      setWishlist((current) => [...current, product.id]);
+    }
   }
-  async function addReview(){
-    if(!user||!selected){setAuthOpen(true);return}
-    const {error}=await supabase.from("reviews").insert({product_id:selected.id,user_id:user.id,rating:review.rating,review:review.review,reviewer_name:fullName||user.email?.split("@")[0]||"Customer"});
-    if(error){setMessage(error.message);return} setReview({rating:5,review:""});setMessage("Review submitted for moderation.");
+
+  async function addReview() {
+    if (!user || !selected) {
+      setAuthOpen(true);
+      return;
+    }
+    const { error } = await supabase.from("reviews").insert({
+      product_id: selected.id,
+      user_id: user.id,
+      rating: review.rating,
+      review: review.review,
+      reviewer_name: fullName || user.email?.split("@")[0] || "Customer",
+    });
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setReview({ rating: 5, review: "" });
+    setMessage("Review submitted for moderation.");
   }
-  async function sendSupport(){
-    if(!user){setAuthOpen(true);return}
-    const {data:c,error:e}=await supabase.from("conversations").insert({user_id:user.id,subject:"Customer support"}).select().single();
-    if(e){setMessage(e.message);return}
-    const {error}=await supabase.from("messages").insert({conversation_id:c.id,sender_id:user.id,body:supportText});
-    if(error){setMessage(error.message);return}setSupportText("");setSupportOpen(false);setMessage("Support message sent.");
+
+  async function sendSupport() {
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
+    const { data: conversation, error: conversationError } = await supabase
+      .from("conversations")
+      .insert({ user_id: user.id, subject: "Customer support" })
+      .select()
+      .single();
+    if (conversationError) {
+      setMessage(conversationError.message);
+      return;
+    }
+    const { error } = await supabase
+      .from("messages")
+      .insert({ conversation_id: conversation.id, sender_id: user.id, body: supportText });
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    setSupportText("");
+    setSupportOpen(false);
+    setMessage("Support message sent.");
   }
-  async function createAdminProduct(e:any){
-    e.preventDefault();
-    const {data:p,error}=await supabase.from("products").insert({name:newProduct.name,slug:newProduct.slug,sku:newProduct.sku,description:newProduct.description,category_id:newProduct.category_id,team:newProduct.team,season:newProduct.season,price:Number(newProduct.price),original_price:newProduct.original_price?Number(newProduct.original_price):null,published:true,featured:true,new_arrival:true,total_stock:40}).select().single();
-    if(error){setMessage(error.message);return}
-    await supabase.from("product_images").insert({product_id:p.id,url:newProduct.image_url,alt_text:p.name,is_primary:true,sort_order:0});
-    await supabase.from("product_sizes").insert(["S","M","L","XL"].map((s,i)=>({product_id:p.id,size:s,stock_qty:10,sort_order:i+1})));
-    setMessage("Product created.");setNewProduct({name:"",slug:"",sku:"",description:"",category_id:"",price:"",original_price:"",image_url:"",team:"NEPKITS",season:"2026"});await loadPublic();await loadAdmin();
+
+  async function createAdminProduct(event: any) {
+    event.preventDefault();
+    const { data: product, error } = await supabase
+      .from("products")
+      .insert({
+        name: newProduct.name,
+        slug: newProduct.slug,
+        sku: newProduct.sku,
+        description: newProduct.description,
+        category_id: newProduct.category_id,
+        team: newProduct.team,
+        season: newProduct.season,
+        price: Number(newProduct.price),
+        original_price: newProduct.original_price ? Number(newProduct.original_price) : null,
+        published: true,
+        featured: true,
+        new_arrival: true,
+        total_stock: 40,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    await supabase.from("product_images").insert({
+      product_id: product.id,
+      url: newProduct.image_url,
+      alt_text: product.name,
+      is_primary: true,
+      sort_order: 0,
+    });
+
+    await supabase.from("product_sizes").insert(
+      ["S", "M", "L", "XL"].map((size, index) => ({
+        product_id: product.id,
+        size,
+        stock_qty: 10,
+        sort_order: index + 1,
+      })),
+    );
+
+    setMessage("Product published.");
+    setNewProduct({
+      name: "",
+      slug: "",
+      sku: "",
+      description: "",
+      category_id: "",
+      price: "",
+      original_price: "",
+      image_url: "",
+      team: "NEPKITS",
+      season: "2026",
+    });
+    await loadPublic();
+    await loadAdmin();
   }
-  async function updateOrder(id:string,status:string){const {error}=await supabase.from("orders").update({order_status:status}).eq("id",id);if(error){setMessage(error.message);return}await loadAdmin();setMessage("Order updated.");}
 
-  return <><nav className="nav"><div className="wrap navin"><a className="brand" href="#"><b>NEP</b>KITS HUB</a><div className="navlinks">{[["shop","Shop"],["cart","Cart ("+cart.reduce((s,x)=>s+x.quantity,0)+")"],["orders","Orders"],["account","Account"],...(role==="admin"?[["admin","Admin"]]:[])].map(([k,label])=><button key={k} className={tab===k?"active":""} onClick={()=>setTab(k)}>{label}</button>)}</div><button className="btn" onClick={()=>user?signOut():setAuthOpen(true)}>{user?"Sign out":"Sign in"}</button></div></nav>
-  <main className="wrap">
-    {tab==="shop"&&<section className="hero"><div className="heroBox"><div className="eyebrow">NEPKITS HUB</div><div className="display">Football gear for match day.</div><p className="muted">Premium football jerseys, kits and sportswear with live stock, account checkout and order tracking.</p><div className="row" style={{marginTop:18}}><button className="btn primary" onClick={()=>document.getElementById("catalog")?.scrollIntoView({behavior:"smooth"})}>Shop now</button><button className="btn" onClick={()=>setAuthOpen(true)}>{user?"Manage account":"Create account"}</button></div></div></section>}
+  async function updateOrder(id: string, status: string) {
+    const { error } = await supabase.from("orders").update({ order_status: status }).eq("id", id);
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+    await loadAdmin();
+    setMessage("Order updated.");
+  }
 
-    {tab==="shop"&&<section id="catalog" className="section"><div className="between"><div><div className="eyebrow">Store</div><h1 className="title">Shop football gear</h1><div className="muted">{filtered.length} live products</div></div><div className="row"><input className="input" style={{minWidth:220}} value={q} onChange={e=>setQ(e.target.value)} placeholder="Search"/></div></div><div className="tabs">{categories.map(c=><button key={c.id} className={"tab "+(cat===c.id?"active":"")} onClick={()=>setCat(cat===c.id?"":c.id)}>{c.name}</button>)}</div>{filtered.length?<div className="grid g4">{filtered.map(p=><article className="card" key={p.id}><div className="img"><img src={p.images?.[0]?.url||""} alt={p.name}/></div><div className="cardbody"><div className="small muted">{p.category?.name||"Football"} · {p.team||"NEPKITS"}</div><h3>{p.name}</h3><div><span className="price">{money(p.price)}</span>{p.original_price&&<span className="old">{money(p.original_price)}</span>}</div><div className="between" style={{marginTop:9}}><span className="small">★ {(Number(p.rating)||0).toFixed(1)}</span><span className="small muted">{Number(p.total_stock)>0?"In stock":"Out of stock"}</span></div><div className="row" style={{marginTop:12}}><button className="btn primary" style={{flex:1}} onClick={()=>setSelected(p)}>View</button><button className="btn" onClick={()=>toggleWish(p)}>{wishlist.includes(p.id)?"♥":"♡"}</button></div></div></article>)}</div>:<div className="panel pad">No products match those filters.</div>}</section>}
+  function go(nextTab: string) {
+    setTab(nextTab);
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-    {tab==="cart"&&<section className="section"><div className="eyebrow">Basket</div><h1 className="title">Shopping cart</h1>{cart.length?<div className="grid g2" style={{marginTop:18}}><div className="stack">{cart.map((x,i)=><div className="item" key={i}><div className="between"><div><strong>{x.product.name}</strong><div className="small muted">Size {x.size} · {money(x.product.price)} each</div></div><button className="btn danger" onClick={()=>remove(x.product.id,x.size)}>Remove</button></div><div className="row" style={{marginTop:10}}><button className="btn" onClick={()=>setCart(v=>v.map(y=>y===x?{...y,quantity:Math.max(1,y.quantity-1)}:y))}>−</button><span>{x.quantity}</span><button className="btn" onClick={()=>setCart(v=>v.map(y=>y===x?{...y,quantity:y.quantity+1}:y))}>+</button></div></div>)}</div><div className="panel pad"><div className="between"><span>Subtotal</span><strong>{money(subtotal)}</strong></div><div className="muted small" style={{marginTop:8}}>Delivery is calculated from your selected zone.</div><select className="select" value={zoneId} onChange={e=>setZoneId(e.target.value)} style={{marginTop:12}}>{zones.map(z=><option key={z.id} value={z.id}>{z.name} — {money(z.delivery_fee)}</option>)}</select><div className="row" style={{marginTop:10}}><button className={"btn "+(payment==="cod"?"primary":"")} onClick={()=>setPayment("cod")}>Cash on delivery</button><button className={"btn "+(payment==="esewa"?"primary":"")} onClick={()=>setPayment("esewa")}>eSewa</button></div><button className="btn primary" style={{width:"100%",marginTop:14}} disabled={busy} onClick={checkout}>{busy?"Creating order…":"Place order"}</button></div></div>:<div className="panel pad" style={{marginTop:18}}>Your cart is empty. <button className="btn primary" onClick={()=>setTab("shop")}>Browse products</button></div>}</section>}
+  const heroImage = banner?.image_url || productImage(featured[0] || products[0]);
+  const heroSubtitle =
+    banner?.subtitle ||
+    settings?.tagline ||
+    "Football culture. Premium jerseys. Built for fans.";
 
-    {tab==="account"&&<section className="section"><div className="eyebrow">Account</div><h1 className="title">Your profile</h1>{user?<div className="grid g2" style={{marginTop:18}}><div className="panel pad"><div className="between"><h3>Signed in</h3><span className="small muted">{user.email}</span></div><form className="stack" onSubmit={saveAddress}><input className="input" value={addressForm.full_name} onChange={e=>setAddressForm({...addressForm,full_name:e.target.value})} placeholder="Full name" required/><input className="input" value={addressForm.phone} onChange={e=>setAddressForm({...addressForm,phone:e.target.value})} placeholder="Phone" required/><input className="input" value={addressForm.address_text} onChange={e=>setAddressForm({...addressForm,address_text:e.target.value})} placeholder="Address" required/><div className="grid g2"><input className="input" value={addressForm.area} onChange={e=>setAddressForm({...addressForm,area:e.target.value})} placeholder="Area" required/><input className="input" value={addressForm.city} onChange={e=>setAddressForm({...addressForm,city:e.target.value})} placeholder="City" required/></div><textarea className="area" value={addressForm.delivery_instructions} onChange={e=>setAddressForm({...addressForm,delivery_instructions:e.target.value})} placeholder="Delivery instructions"/><button className="btn primary">Save address</button></form></div><div className="panel pad"><h3>Saved addresses</h3>{addresses.length?<div className="list">{addresses.map(a=><div className="item" key={a.id}><strong>{a.full_name}</strong><div className="small muted">{a.phone}</div><div className="small">{a.address_text}, {a.area}, {a.city}</div></div>)}</div>:<div className="muted">No address saved yet.</div>}<div className="notice" style={{marginTop:14}}>Delivery: {zones.map(z=>z.name+" ("+money(z.delivery_fee)+")").join(", ")||"configured by store"}.</div></div></div>:<div className="panel pad">Sign in to manage your profile and addresses. <button className="btn primary" onClick={()=>setAuthOpen(true)}>Sign in</button></div>}</section>}
+  return (
+    <>
+      <div className="announcement">
+        <div className="site-shell announcement-inner">
+          <span>{settings?.announcement || "Premium football culture, delivered."}</span>
+          <span className="announcement-right">Free delivery promos update from store settings</span>
+        </div>
+      </div>
 
-    {tab==="orders"&&<section className="section"><div className="eyebrow">Account</div><h1 className="title">Orders</h1>{user?(orders.length?<div className="list" style={{marginTop:18}}>{orders.map(o=><div className="item" key={o.id}><div className="between"><div><strong>{o.order_number}</strong><div className="small muted">{new Date(o.created_at).toLocaleString()} · {o.order_status.replaceAll("_"," ")}</div></div><strong>{money(o.total)}</strong></div><div className="small muted" style={{marginTop:7}}>Payment: {o.payment_status} · {o.payment_method}</div><div className="list" style={{marginTop:10}}>{(o.order_items??[]).map((it:any)=><div className="small" key={it.id}>{it.product_name} · {it.size} × {it.quantity}</div>)}</div></div>)}</div>:<div className="panel pad">No orders yet. <button className="btn primary" onClick={()=>setTab("shop")}>Start shopping</button></div>):<div className="panel pad">Sign in to see your orders.</div>}</section>}
+      <header className="site-header">
+        <div className="site-shell header-inner">
+          <button className="mobile-menu-btn" onClick={() => setMenuOpen((current) => !current)} aria-label="Menu">
+            ☰
+          </button>
+          <button className="brand-mark" onClick={() => go("shop")} aria-label="NEPKITS HUB home">
+            <span>NEP</span>KITS <em>HUB</em>
+          </button>
 
-    {tab==="admin"&&role==="admin"&&<section className="section"><div className="eyebrow">Admin</div><h1 className="title">Store operations</h1><div className="tabs"><button className="tab active">Products</button><button className="tab" onClick={()=>setSupportOpen(true)}>Support</button></div><div className="grid g2"><div className="panel pad"><h3>Add product</h3><form className="stack" onSubmit={createAdminProduct}><input className="input" value={newProduct.name} onChange={e=>setNewProduct({...newProduct,name:e.target.value})} placeholder="Product name" required/><input className="input" value={newProduct.slug} onChange={e=>setNewProduct({...newProduct,slug:e.target.value})} placeholder="Slug" required/><input className="input" value={newProduct.sku} onChange={e=>setNewProduct({...newProduct,sku:e.target.value})} placeholder="SKU" required/><select className="select" value={newProduct.category_id} onChange={e=>setNewProduct({...newProduct,category_id:e.target.value})} required><option value="">Category</option>{categories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select><div className="grid g2"><input className="input" value={newProduct.price} onChange={e=>setNewProduct({...newProduct,price:e.target.value})} placeholder="Price" required/><input className="input" value={newProduct.original_price} onChange={e=>setNewProduct({...newProduct,original_price:e.target.value})} placeholder="Original price"/></div><input className="input" value={newProduct.image_url} onChange={e=>setNewProduct({...newProduct,image_url:e.target.value})} placeholder="Product image URL" required/><textarea className="area" value={newProduct.description} onChange={e=>setNewProduct({...newProduct,description:e.target.value})} placeholder="Description"/><button className="btn primary">Publish product</button></form></div><div className="panel pad"><h3>Orders</h3><div className="list">{adminOrders.map(o=><div className="item" key={o.id}><div className="between"><strong>{o.order_number}</strong><select className="select" style={{maxWidth:180}} value={o.order_status} onChange={e=>updateOrder(o.id,e.target.value)}>{["placed","confirmed","processing","packed","shipped","out_for_delivery","delivered","cancelled"].map(s=><option key={s} value={s}>{s.replaceAll("_"," ")}</option>)}</select></div><div className="small muted">{money(o.total)} · {o.payment_method}</div></div>)}</div></div></div></section>}
+          <nav className={"main-nav " + (menuOpen ? "open" : "")}>
+            <button className="nav-link" onClick={() => go("shop")}>New Arrivals</button>
+            <button className="nav-link" onClick={() => { setTab("shop"); setCat(categories.find((item) => /jersey/i.test(item.name))?.id || ""); setMenuOpen(false); }}>Jerseys</button>
+            <button className="nav-link" onClick={() => { setTab("shop"); setCat(categories.find((item) => /kit/i.test(item.name))?.id || ""); setMenuOpen(false); }}>Kits</button>
+            <button className="nav-link" onClick={() => go("shop")}>Collections</button>
+            <button className="nav-link" onClick={() => { setTab("shop"); setCat(""); setMenuOpen(false); }}>Best Sellers</button>
+            <button className="nav-link sale-link" onClick={() => { setTab("shop"); setCat(""); setQ(""); setMenuOpen(false); }}>Sale</button>
+          </nav>
 
-    {message&&<div className="notice" style={{position:"fixed",right:18,bottom:18,maxWidth:420,zIndex:30}}>{message}</div>}
-  </main>
+          <div className="header-actions">
+            <button className="icon-action search-toggle" onClick={() => go("shop")} aria-label="Search">⌕</button>
+            <button className="icon-action hide-mobile" onClick={() => user ? go("account") : setAuthOpen(true)} aria-label="Account">◌</button>
+            <button className="icon-action hide-mobile" onClick={() => user ? setMessage("Wishlist ready in your account.") : setAuthOpen(true)} aria-label="Wishlist">♡<span className="icon-count">{wishlist.length}</span></button>
+            <button className="bag-action" onClick={() => go("cart")}>Bag <span>{cartCount}</span></button>
+          </div>
+        </div>
+      </header>
 
-  {selected&&<div className="modal" onMouseDown={e=>{if(e.currentTarget===e.target)setSelected(null)}}><div className="modalbox"><div className="between"><h2>{selected.name}</h2><button className="btn" onClick={()=>setSelected(null)}>Close</button></div><div className="grid g2" style={{marginTop:14}}><div className="img"><img src={selected.images?.[0]?.url||""} alt={selected.name}/></div><div className="stack"><div className="muted">{selected.category?.name} · {selected.team}</div><p>{selected.description}</p><div><span className="price">{money(selected.price)}</span></div><div><strong>Size</strong><div className="row" style={{flexWrap:"wrap",marginTop:8}}>{(selected.sizes??[]).map((s:any)=><button key={s.id} className="size sel" disabled={s.stock_qty<1} onClick={()=>{const n=prompt("Quantity?","1");const qty=Math.max(1,Number(n)||1);add(selected,s.size,Math.min(qty,s.stock_qty));}}>{s.size} · {s.stock_qty}</button>)}</div></div><div className="panel pad"><div className="small muted">Wishlist</div><button className="btn" onClick={()=>toggleWish(selected)}>{wishlist.includes(selected.id)?"Remove from wishlist":"Save to wishlist"}</button></div><div className="panel pad"><h3>Review</h3><div className="row"><select className="select" value={review.rating} onChange={e=>setReview({...review,rating:Number(e.target.value)})}><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></div><textarea className="area" value={review.review} onChange={e=>setReview({...review,review:e.target.value})} placeholder="Share your experience" style={{marginTop:8}}/><button className="btn primary" onClick={addReview}>Submit review</button></div></div></div></div></div>}
+      <main>
+        {tab === "shop" && (
+          <>
+            <section className="hero-editorial">
+              <div className="hero-media">
+                <img src={heroImage || "/placeholder.jpg"} alt="NEPKITS HUB football fashion" />
+                <div className="hero-vignette" />
+              </div>
+              <div className="site-shell hero-content">
+                <div className="hero-copy">
+                  <div className="eyebrow-light">NEPKITS HUB · 2026</div>
+                  <h1>WEAR<br />THE GAME</h1>
+                  <p>{heroSubtitle}</p>
+                  <div className="hero-actions">
+                    <button className="fashion-btn fashion-btn-light" onClick={() => document.getElementById("latest-drop")?.scrollIntoView({ behavior: "smooth" })}>Shop Collection</button>
+                    <button className="fashion-btn fashion-btn-ghost-light" onClick={() => document.getElementById("latest-drop")?.scrollIntoView({ behavior: "smooth" })}>Explore New Arrivals</button>
+                  </div>
+                </div>
+                <div className="hero-caption">
+                  <span>{banner?.button_text || "The latest drop"}</span>
+                  <span>{banner?.button_url || "/shop"}</span>
+                </div>
+              </div>
+            </section>
 
-  {supportOpen&&<div className="modal"><div className="modalbox"><div className="between"><h2>Customer support</h2><button className="btn" onClick={()=>setSupportOpen(false)}>Close</button></div><p className="muted">Send a message linked to your account.</p><textarea className="area" value={supportText} onChange={e=>setSupportText(e.target.value)} placeholder="How can we help?"/><button className="btn primary" style={{marginTop:10}} onClick={sendSupport}>Send</button></div></div>}
+            <section className="collection-strip">
+              <div className="site-shell">
+                <div className="section-intro compact">
+                  <div>
+                    <div className="eyebrow">Shop the edit</div>
+                    <h2>Collections</h2>
+                  </div>
+                  <button className="text-link" onClick={() => go("shop")}>View all ↗</button>
+                </div>
+                <div className="collection-grid">
+                  {categories.slice(0, 5).map((category) => {
+                    const collectionProduct = products.find((product) => product.category_id === category.id);
+                    return (
+                      <button
+                        className="collection-card"
+                        key={category.id}
+                        onClick={() => { setTab("shop"); setCat(category.id); setMenuOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      >
+                        <img src={productImage(collectionProduct)} alt={category.name} />
+                        <span className="collection-overlay" />
+                        <div className="collection-copy">
+                          <span>{category.description || "Football culture"}</span>
+                          <strong>{category.name}</strong>
+                          <small>Explore ↗</small>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
 
-  {authOpen&&<div className="modal"><div className="modalbox"><div className="between"><h2>{authMode==="login"?"Sign in":"Create account"}</h2><button className="btn" onClick={()=>setAuthOpen(false)}>Close</button></div>{authMode==="signup"&&<input className="input" style={{marginTop:12}} value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="Full name" /> }<input className="input" style={{marginTop:12}} value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email"/><input className="input" style={{marginTop:10}} type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password"/><button className="btn primary" style={{width:"100%",marginTop:12}} disabled={busy} onClick={auth}>{busy?"Please wait…":authMode==="login"?"Sign in":"Create account"}</button><button className="btn" style={{width:"100%",marginTop:8}} onClick={()=>setAuthMode(authMode==="login"?"signup":"login")}>{authMode==="login"?"Need an account? Sign up":"Already have an account? Sign in"}</button></div></div>}
-  </>;
+            <section id="latest-drop" className="product-section">
+              <div className="site-shell">
+                <div className="section-intro">
+                  <div>
+                    <div className="eyebrow">Latest drop</div>
+                    <h2>THE LATEST DROP</h2>
+                  </div>
+                  <p>New season silhouettes, matchday staples and premium fanwear—curated from the live catalog.</p>
+                </div>
+
+                <div className="editorial-grid">
+                  {(latest.length ? latest : featured).slice(0, 4).map((product, index) => (
+                    <article className={"product-card editorial-product " + (index === 0 ? "feature-card" : "")} key={product.id}>
+                      <div className="product-visual">
+                        <img src={productImage(product)} alt={product.name} loading="lazy" />
+                        <div className="product-badges">
+                          {product.new_arrival && <span>NEW</span>}
+                          {Number(product.discount_percent) > 0 && <span>SALE</span>}
+                        </div>
+                        <button className={"wishlist-btn " + (wishlist.includes(product.id) ? "saved" : "")} onClick={() => toggleWish(product)} aria-label="Wishlist">{wishlist.includes(product.id) ? "♥" : "♡"}</button>
+                        <div className="hover-actions">
+                          <button className="quick-btn" onClick={() => add(product)}>Quick Add</button>
+                          <button className="quick-btn dark" onClick={() => setSelected(product)}>Quick View</button>
+                        </div>
+                      </div>
+                      <div className="product-meta">
+                        <div className="product-kicker">{product.team || "NEPKITS"} · {product.season || "2026"}</div>
+                        <h3>{product.name}</h3>
+                        <div className="product-price-row">
+                          <strong>{money(product.price)}</strong>
+                          {product.original_price && <del>{money(product.original_price)}</del>}
+                          {Number(product.discount_percent) > 0 && <span>{Math.round(Number(product.discount_percent))}% OFF</span>}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="feature-band">
+              <div className="site-shell feature-band-grid">
+                <div>
+                  <div className="eyebrow">NEPKITS HUB</div>
+                  <h2>Football culture,<br /><i>refined.</i></h2>
+                  <p>Minimal silhouettes. Matchday energy. A tighter edit of the shirts and sportswear you actually want to wear beyond the stadium.</p>
+                  <button className="fashion-btn dark-fill" onClick={() => go("shop")}>Explore the collection</button>
+                </div>
+                <div className="feature-photo">
+                  <img src={productImage(products.find((product) => product.bestseller) || products[1])} alt="NEPKITS HUB supporter style" loading="lazy" />
+                </div>
+              </div>
+            </section>
+
+            <section className="product-section soft">
+              <div className="site-shell">
+                <div className="section-intro">
+                  <div>
+                    <div className="eyebrow">Fan favorites</div>
+                    <h2>FAN FAVORITES</h2>
+                  </div>
+                  <button className="text-link" onClick={() => go("shop")}>Shop best sellers ↗</button>
+                </div>
+                <div className="horizontal-products">
+                  {best.map((product) => (
+                    <article className="mini-product-card" key={product.id}>
+                      <div className="mini-visual">
+                        <img src={productImage(product)} alt={product.name} loading="lazy" />
+                        <button className="wishlist-btn" onClick={() => toggleWish(product)} aria-label="Wishlist">{wishlist.includes(product.id) ? "♥" : "♡"}</button>
+                      </div>
+                      <div className="mini-meta">
+                        <div className="product-kicker">{product.team || "NEPKITS"}</div>
+                        <h3>{product.name}</h3>
+                        <div className="product-price-row"><strong>{money(product.price)}</strong><span>★ {Number(product.rating || 0).toFixed(1)}</span></div>
+                        <button className="under-btn" onClick={() => add(product)}>Quick Add</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {sale.length > 0 && (
+              <section className="sale-banner">
+                <div className="site-shell sale-inner">
+                  <div>
+                    <div className="eyebrow">Limited edit</div>
+                    <h2>SALE · {Math.max(...sale.map((product) => Math.round(Number(product.discount_percent || 0))))}% OFF</h2>
+                    <p>Selected styles, limited sizes, same NEPKITS quality.</p>
+                  </div>
+                  <button className="fashion-btn fashion-btn-dark" onClick={() => go("cart")}>View sale styles</button>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {tab === "cart" && (
+          <section className="shop-shell">
+            <div className="site-shell">
+              <div className="page-heading"><div className="eyebrow">The bag</div><h1>YOUR BAG</h1><p>{cartCount} items</p></div>
+              {cart.length ? (
+                <div className="bag-grid">
+                  <div className="bag-list">
+                    {cart.map((item) => (
+                      <div className="bag-line" key={item.product.id + item.size}>
+                        <img src={productImage(item.product)} alt={item.product.name} />
+                        <div className="bag-info">
+                          <div className="product-kicker">{item.product.team || "NEPKITS"} · {item.product.season || "2026"}</div>
+                          <h3>{item.product.name}</h3>
+                          <div className="muted-line">Size {item.size}</div>
+                          <div className="bag-controls">
+                            <div className="qty-stepper">
+                              <button onClick={() => setCart((current) => current.map((line) => line === item ? { ...line, quantity: Math.max(1, line.quantity - 1) } : line))}>−</button>
+                              <span>{item.quantity}</span>
+                              <button onClick={() => setCart((current) => current.map((line) => line === item ? { ...line, quantity: line.quantity + 1 } : line))}>+</button>
+                            </div>
+                            <button className="line-link" onClick={() => remove(item.product.id, item.size)}>Remove</button>
+                          </div>
+                        </div>
+                        <strong className="bag-price">{money(Number(item.product.price) * item.quantity)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                  <aside className="summary-card">
+                    <div className="eyebrow">Order summary</div>
+                    <div className="summary-row"><span>Subtotal</span><strong>{money(subtotal)}</strong></div>
+                    <div className="summary-row muted-line"><span>Delivery</span><span>Calculated at checkout</span></div>
+                    <div className="summary-divider" />
+                    <div className="summary-row total"><span>Total</span><strong>{money(subtotal)}</strong></div>
+                    <select className="fashion-select" value={zoneId} onChange={(e) => setZoneId(e.target.value)}>{zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name} — {money(zone.delivery_fee)}</option>)}</select>
+                    <div className="payment-row">
+                      <button className={payment === "cod" ? "pay active" : "pay"} onClick={() => setPayment("cod")}>Cash on delivery</button>
+                      <button className={payment === "esewa" ? "pay active" : "pay"} onClick={() => setPayment("esewa")}>eSewa</button>
+                    </div>
+                    <button className="checkout-btn" onClick={checkout} disabled={busy}>{busy ? "Creating order…" : "CHECKOUT"}</button>
+                  </aside>
+                </div>
+              ) : (
+                <div className="empty-state"><div className="eyebrow">Nothing here yet</div><h2>YOUR BAG IS EMPTY</h2><p>Start with the latest football edit.</p><button className="checkout-btn small-cta" onClick={() => go("shop")}>SHOP NOW</button></div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {tab === "account" && (
+          <section className="shop-shell">
+            <div className="site-shell">
+              <div className="page-heading"><div className="eyebrow">Account</div><h1>YOUR PROFILE</h1><p>{user?.email || "Sign in to manage your account."}</p></div>
+              {user ? (
+                <div className="account-grid">
+                  <aside className="account-sidebar">
+                    <div className="member-card">
+                      <div className="avatar">{(fullName || user.email || "N").slice(0, 1).toUpperCase()}</div>
+                      <strong>{fullName || "NEPKITS member"}</strong>
+                      <span>Member since {new Date(user.created_at).getFullYear()}</span>
+                    </div>
+                    {["account", "orders", "cart"].map((item) => <button key={item} className={tab === item ? "account-link active" : "account-link"} onClick={() => go(item)}>{item === "account" ? "Overview" : item[0].toUpperCase() + item.slice(1)}</button>)}
+                    <button className="account-link" onClick={() => setSupportOpen(true)}>Support</button>
+                    <button className="account-link" onClick={signOut}>Logout</button>
+                  </aside>
+                  <div className="account-main">
+                    <div className="account-stats">
+                      <div><span>Orders</span><strong>{orders.length}</strong></div>
+                      <div><span>Wishlist</span><strong>{wishlist.length}</strong></div>
+                      <div><span>Saved addresses</span><strong>{addresses.length}</strong></div>
+                    </div>
+                    <div className="account-panel">
+                      <div className="panel-heading"><div><div className="eyebrow">Shipping</div><h2>Saved address</h2></div></div>
+                      <form className="account-form" onSubmit={saveAddress}>
+                        <input className="fashion-input" value={addressForm.full_name} onChange={(e) => setAddressForm({ ...addressForm, full_name: e.target.value })} placeholder="Full name" required />
+                        <input className="fashion-input" value={addressForm.phone} onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })} placeholder="Phone" required />
+                        <input className="fashion-input wide" value={addressForm.address_text} onChange={(e) => setAddressForm({ ...addressForm, address_text: e.target.value })} placeholder="Address" required />
+                        <input className="fashion-input" value={addressForm.area} onChange={(e) => setAddressForm({ ...addressForm, area: e.target.value })} placeholder="Area" required />
+                        <input className="fashion-input" value={addressForm.city} onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })} placeholder="City" required />
+                        <textarea className="fashion-input wide textarea" value={addressForm.delivery_instructions} onChange={(e) => setAddressForm({ ...addressForm, delivery_instructions: e.target.value })} placeholder="Delivery instructions" />
+                        <button className="checkout-btn small-cta">SAVE ADDRESS</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="empty-state"><div className="eyebrow">Member access</div><h2>SIGN IN TO YOUR ACCOUNT</h2><p>Orders, wishlist, saved addresses and support live here.</p><button className="checkout-btn small-cta" onClick={() => setAuthOpen(true)}>SIGN IN</button></div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {tab === "orders" && (
+          <section className="shop-shell">
+            <div className="site-shell">
+              <div className="page-heading"><div className="eyebrow">Orders</div><h1>ORDER HISTORY</h1><p>Track every drop from confirmed to delivered.</p></div>
+              {user && orders.length ? (
+                <div className="orders-stack">
+                  {orders.map((order) => (
+                    <article className="order-card" key={order.id}>
+                      <div className="order-head"><div><div className="eyebrow">Order</div><strong>{order.order_number}</strong></div><div className="order-status">{order.order_status.replaceAll("_", " ")}</div></div>
+                      <div className="order-timeline">{["confirmed", "packed", "shipped", "out_for_delivery", "delivered"].map((status, index) => <div className={["confirmed", "packed", "shipped", "out_for_delivery", "delivered"].indexOf(order.order_status) >= index ? "timeline-step active" : "timeline-step"} key={status}><span>{index + 1}</span><small>{status.replaceAll("_", " ")}</small></div>)}</div>
+                      <div className="order-body">
+                        <div>{(order.order_items ?? []).map((item: any) => <div className="order-item" key={item.id}><img src={item.product_image_url || ""} alt={item.product_name} /><div><strong>{item.product_name}</strong><div className="muted-line">Size {item.size} · Qty {item.quantity}</div></div><strong>{money(item.subtotal)}</strong></div>)}</div>
+                        <div className="order-total"><span>Total</span><strong>{money(order.total)}</strong><span className="muted-line">{order.payment_method} · {order.payment_status}</span></div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : <div className="empty-state"><div className="eyebrow">Your archive</div><h2>NO ORDERS YET</h2><p>Your purchases will appear here.</p><button className="checkout-btn small-cta" onClick={() => go("shop")}>START SHOPPING</button></div>}
+            </div>
+          </section>
+        )}
+
+        {tab === "admin" && role === "admin" && (
+          <section className="shop-shell">
+            <div className="site-shell">
+              <div className="page-heading"><div className="eyebrow">Store control</div><h1>ADMIN PORTAL</h1><p>Live catalog, inventory and order operations.</p></div>
+              <div className="admin-grid">
+                <div className="account-panel">
+                  <div className="panel-heading"><div><div className="eyebrow">Catalog</div><h2>Publish product</h2></div></div>
+                  <form className="account-form" onSubmit={createAdminProduct}>
+                    <input className="fashion-input" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} placeholder="Product name" required />
+                    <input className="fashion-input" value={newProduct.slug} onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })} placeholder="Slug" required />
+                    <input className="fashion-input" value={newProduct.sku} onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })} placeholder="SKU" required />
+                    <select className="fashion-select wide" value={newProduct.category_id} onChange={(e) => setNewProduct({ ...newProduct, category_id: e.target.value })} required><option value="">Category</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select>
+                    <input className="fashion-input" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} placeholder="Price" required />
+                    <input className="fashion-input" value={newProduct.original_price} onChange={(e) => setNewProduct({ ...newProduct, original_price: e.target.value })} placeholder="Original price" />
+                    <input className="fashion-input wide" value={newProduct.image_url} onChange={(e) => setNewProduct({ ...newProduct, image_url: e.target.value })} placeholder="Product image URL" required />
+                    <textarea className="fashion-input wide textarea" value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} placeholder="Description" />
+                    <button className="checkout-btn small-cta">PUBLISH PRODUCT</button>
+                  </form>
+                </div>
+                <div className="account-panel">
+                  <div className="panel-heading"><div><div className="eyebrow">Orders</div><h2>Live order queue</h2></div></div>
+                  <div className="admin-order-list">{adminOrders.map((order) => <div className="admin-order" key={order.id}><div><strong>{order.order_number}</strong><span className="muted-line">{money(order.total)} · {order.payment_method}</span></div><select className="fashion-select compact" value={order.order_status} onChange={(e) => updateOrder(order.id, e.target.value)}>{["placed","confirmed","processing","packed","shipped","out_for_delivery","delivered","cancelled"].map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}</select></div>)}</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </main>
+
+      <footer className="site-footer">
+        <div className="site-shell footer-grid">
+          <div>
+            <button className="brand-mark footer-brand" onClick={() => go("shop")}><span>NEP</span>KITS <em>HUB</em></button>
+            <p>Football culture. Premium jerseys. Built for fans.</p>
+          </div>
+          <div><div className="footer-label">Shop</div><button onClick={() => go("shop")}>New arrivals</button><button onClick={() => go("shop")}>Best sellers</button><button onClick={() => go("shop")}>Sale</button></div>
+          <div><div className="footer-label">Help</div><button onClick={() => setSupportOpen(true)}>Support</button><button onClick={() => go("orders")}>Track order</button><button onClick={() => go("account")}>Account</button></div>
+          <div><div className="footer-label">Store</div><span>{settings?.tagline || "Premium football jerseys, kits and sportswear."}</span><span>{settings?.delivery_notes || "Delivery is configured by the store."}</span></div>
+        </div>
+      </footer>
+
+      <div className="mobile-bottom-nav">
+        <button onClick={() => go("shop")} className={tab === "shop" ? "active" : ""}><span>⌂</span>Home</button>
+        <button onClick={() => go("shop")}><span>⌕</span>Shop</button>
+        <button onClick={() => user ? setMessage("Wishlist is available from your account.") : setAuthOpen(true)}><span>♡</span>Wishlist</button>
+        <button onClick={() => go("cart")} className={tab === "cart" ? "active" : ""}><span>Bag</span>{cartCount}</button>
+        <button onClick={() => user ? go("account") : setAuthOpen(true)} className={tab === "account" ? "active" : ""}><span>◌</span>Profile</button>
+      </div>
+
+      {message && <div className="toast">{message}</div>}
+
+      {selected && (
+        <div className="overlay" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelected(null); }}>
+          <div className="drawer">
+            <div className="drawer-head"><div><div className="eyebrow">Quick view</div><h2>{selected.name}</h2></div><button className="close-btn" onClick={() => setSelected(null)}>×</button></div>
+            <div className="drawer-grid">
+              <div className="drawer-image"><img src={productImage(selected)} alt={selected.name} /></div>
+              <div className="drawer-copy">
+                <div className="product-kicker">{selected.team || "NEPKITS"} · {selected.season || "2026"}</div>
+                <div className="drawer-price">{money(selected.price)} {selected.original_price && <del>{money(selected.original_price)}</del>}</div>
+                <p>{selected.description}</p>
+                <div className="eyebrow">Size</div>
+                <div className="size-row">{(selected.sizes ?? []).map((size: any) => <button className="size-chip" disabled={Number(size.stock_qty) < 1} key={size.id} onClick={() => add(selected, size.size)}>{size.size}</button>)}</div>
+                <button className="checkout-btn" onClick={() => { add(selected); setSelected(null); }}>ADD TO BAG</button>
+                <button className="drawer-wish" onClick={() => toggleWish(selected)}>{wishlist.includes(selected.id) ? "♥ Saved to wishlist" : "♡ Save to wishlist"}</button>
+                <div className="drawer-detail-list">
+                  <div><span>Material</span><strong>{selected.material || "Premium polyester"}</strong></div>
+                  <div><span>Fit</span><strong>{selected.fit || "Regular"}</strong></div>
+                  <div><span>Availability</span><strong>{Number(selected.total_stock) > 0 ? "In stock" : "Sold out"}</strong></div>
+                </div>
+                <div className="review-box"><div className="eyebrow">Reviews</div><div className="review-stars">★ {Number(selected.rating || 0).toFixed(1)}</div><textarea className="fashion-input textarea" value={review.review} onChange={(e) => setReview({ ...review, review: e.target.value })} placeholder="Share your experience" /><button className="under-btn" onClick={addReview}>Submit review</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {supportOpen && (
+        <div className="overlay">
+          <div className="auth-card">
+            <div className="drawer-head"><div><div className="eyebrow">Support</div><h2>HOW CAN WE HELP?</h2></div><button className="close-btn" onClick={() => setSupportOpen(false)}>×</button></div>
+            <textarea className="fashion-input textarea wide" value={supportText} onChange={(e) => setSupportText(e.target.value)} placeholder="Tell us what you need." />
+            <button className="checkout-btn" onClick={sendSupport}>SEND MESSAGE</button>
+          </div>
+        </div>
+      )}
+
+      {authOpen && (
+        <div className="overlay">
+          <div className="auth-card">
+            <div className="drawer-head"><div><div className="eyebrow">Member access</div><h2>{authMode === "login" ? "WELCOME BACK" : "JOIN NEPKITS HUB"}</h2></div><button className="close-btn" onClick={() => setAuthOpen(false)}>×</button></div>
+            {authMode === "signup" && <input className="fashion-input wide" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" />}
+            <input className="fashion-input wide" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+            <input className="fashion-input wide" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+            <button className="checkout-btn" disabled={busy} onClick={auth}>{busy ? "PLEASE WAIT…" : authMode === "login" ? "SIGN IN" : "CREATE ACCOUNT"}</button>
+            <button className="text-link auth-switch" onClick={() => setAuthMode(authMode === "login" ? "signup" : "login")}>{authMode === "login" ? "Need an account? Create one" : "Already a member? Sign in"}</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
