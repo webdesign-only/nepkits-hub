@@ -1,8 +1,8 @@
 'use client';
 import {useState} from 'react';
-import {createClient} from '@supabase/supabase-js';
 
-const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
+
+import { supabase } from '../lib/supabase-browser';
 
 export default function AccountLogout(){
  const [busy,setBusy]=useState(false);
