@@ -10,30 +10,33 @@ export const metadata:Metadata={
 };
 
 function Header(){
-  return <><header className='market-header'>
-    <div className='market-top'><div className='market-top-inner'><span>NEPKITS HUB • FOOTBALL MARKETPLACE</span><div><Link href='/orders'>TRACK ORDER</Link><Link href='/account'>HELP</Link><Link href='/account'>SELL WITH US</Link></div></div></div>
-    <div className='market-main'>
-      <div className='market-shell market-main-inner'>
-        <Link href='/' className='market-logo'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
-        <form action='/shop' className='market-search'><input name='q' placeholder='Search jerseys, clubs, players, World Cup…'/><button>SEARCH</button></form>
-        <div className='market-actions'>
-          <button type='button' className='market-account-button' onClick={()=>window.dispatchEvent(new Event('nepkits:login'))}><span>◯</span><b>Account</b></button>
-          <Link href='/orders'><span>↗</span><b>Orders</b></Link>
-          <Link href='/cart' className='market-cart'><span>🛒</span><b>Cart</b><CartBadge/></Link>
+  return <>
+    <header className='market-header'>
+      <div className='market-top'><div className='market-top-inner'><span>NEPKITS HUB • FOOTBALL MARKETPLACE</span><div><Link href='/orders'>TRACK ORDER</Link><Link href='/account'>HELP</Link><Link href='/account'>SELL WITH US</Link></div></div></div>
+      <div className='market-main'>
+        <div className='market-shell market-main-inner'>
+          <Link href='/' className='market-logo'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
+          <form action='/shop' className='market-search'><input name='q' placeholder='Search jerseys, clubs, players, World Cup…'/><button>SEARCH</button></form>
+          <div className='market-actions'>
+            <button type='button' className='market-account-button' onClick={()=>window.dispatchEvent(new Event('nepkits:login'))}><span>◯</span><b>Account</b></button>
+            <Link href='/orders'><span>↗</span><b>Orders</b></Link>
+            <Link href='/cart' className='market-cart'><span>🛒</span><b>Cart</b><CartBadge/></Link>
+          </div>
         </div>
       </div>
-    </div>
-    <nav className='market-nav'><div className='market-shell market-nav-inner'>
-      <Link className='all-cat' href='/shop'>☰ ALL CATEGORIES</Link>
-      <Link href='/shop?category=a201ec0c-b146-46c7-91fb-ca7c803e5330'>CLUB JERSEYS</Link>
-      <Link href='/shop?category=3fe4a585-eca3-4c88-b73d-cadb5cbf608c'>WORLD CUP 2026</Link>
-      <Link href='/shop?collection=new'>NEW ARRIVALS</Link>
-      <Link href='/shop?collection=best'>BEST SELLERS</Link>
-      <Link href='/shop?collection=sale'>FLASH DEALS</Link>
-      <Link href='/shop?category=40922dbe-69ec-40fe-a8b2-074afc825b13'>KITS</Link>
-      <Link href='/shop?category=23e4996d-7e17-4cd9-9338-f4cebd4040ec'>FAN GEAR</Link>
-    </div></nav>
-  </header>
+      <nav className='market-nav'><div className='market-shell market-nav-inner'>
+        <Link className='all-cat' href='/shop'>☰ ALL CATEGORIES</Link>
+        <Link href='/shop?category=a201ec0c-b146-46c7-91fb-ca7c803e5330'>CLUB JERSEYS</Link>
+        <Link href='/shop?category=3fe4a585-eca3-4c88-b73d-cadb5cbf608c'>WORLD CUP 2026</Link>
+        <Link href='/shop?collection=new'>NEW ARRIVALS</Link>
+        <Link href='/shop?collection=best'>BEST SELLERS</Link>
+        <Link href='/shop?collection=sale'>FLASH DEALS</Link>
+        <Link href='/shop?category=40922dbe-69ec-40fe-a8b2-074afc825b13'>KITS</Link>
+        <Link href='/shop?category=23e4996d-7e17-4cd9-9338-f4cebd4040ec'>FAN GEAR</Link>
+      </div></nav>
+    </header>
+    <LoginModal/>
+  </>
 }
 
 function Footer(){
@@ -48,4 +51,6 @@ function Footer(){
   </footer>
 }
 
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang='en'><body><Header/>{children}<Footer/></body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}){
+  return <html lang='en'><body><Header/>{children}<Footer/></body></html>
+}
