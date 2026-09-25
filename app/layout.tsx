@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import CartBadge from '../components/cart-badge';
 import LoginModal from '../components/login-modal';
+import LoginTrigger from '../components/login-trigger';
 import './globals.css';
 
 export const metadata:Metadata={
@@ -18,7 +19,7 @@ function Header(){
           <Link href='/' className='market-logo'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
           <form action='/shop' className='market-search'><input name='q' placeholder='Search jerseys, clubs, players, World Cup…'/><button>SEARCH</button></form>
           <div className='market-actions'>
-            <button type='button' className='market-account-button' onClick={()=>window.dispatchEvent(new Event('nepkits:login'))}><span>◯</span><b>Account</b></button>
+            <LoginTrigger/>
             <Link href='/orders'><span>↗</span><b>Orders</b></Link>
             <Link href='/cart' className='market-cart'><span>🛒</span><b>Cart</b><CartBadge/></Link>
           </div>
