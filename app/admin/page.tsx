@@ -26,6 +26,7 @@ export default function AdminPage() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [zones, setZones] = useState<any[]>([]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [banner, setBanner] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
 
@@ -38,6 +39,7 @@ export default function AdminPage() {
   const [newCategory, setNewCategory] = useState({ name: "", description: "" });
   const [settingsDraft, setSettingsDraft] = useState<any>(null);
   const [bannerDraft, setBannerDraft] = useState<any>(null);
+  const [newPromotion, setNewPromotion] = useState({ code: "", discount_percent: "10", active: true });
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -62,14 +64,15 @@ export default function AdminPage() {
   }
 
   async function loadAll() {
-    const [p, o, r, c, conv, cat, z, b, s] = await Promise.all([
+    const [p, o, r, c, conv, cat, z, pr, b, s] = await Promise.all([
       supabase.from("products").select("*,category:categories(name,slug),images:product_images(id,url,is_primary,sort_order),sizes:product_sizes(id,size,stock_qty,sort_order)").order("created_at", { ascending: false }),
-      supabase.from("orders").select("*,order_items(*)").order("created_at", { ascending: false }).limit(250),
+      supabase.from("orders").select("*,order_items(*),payments(*)").order("created_at", { ascending: false }).limit(250),
       supabase.from("reviews").select("*,product:products(name)").order("created_at", { ascending: false }).limit(250),
       supabase.from("profiles").select("id,full_name,username,phone,role,created_at").order("created_at", { ascending: false }).limit(500),
       supabase.from("conversations").select("*").order("updated_at", { ascending: false }).limit(250),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("delivery_zones").select("*").order("name"),
+      supabase.from("promotions").select("*").order("created_at", { ascending: false }),
       supabase.from("homepage_banners").select("*").eq("active", true).order("sort_order").limit(1).maybeSingle(),
       supabase.from("store_settings").select("*").limit(1).maybeSingle()
     ]);
@@ -80,6 +83,7 @@ export default function AdminPage() {
     setConversations(conv.data ?? []);
     setCategories(cat.data ?? []);
     setZones(z.data ?? []);
+    setPromotions(pr.data ?? []);
     setBanner(b.data ?? null);
     setSettings(s.data ?? null);
   }
@@ -152,6 +156,62 @@ export default function AdminPage() {
     const { error } = await supabase.from("reviews").update({ status }).eq("id", id);
     if (error) notify(error.message);
     else { await loadAll(); notify("Review " + status + "."); }
+  }
+
+  async function deleteProduct(product: any) {
+    const confirmed = window.confirm("Remove " + product.name + " from the catalog?");
+    if (!confirmed) return;
+    await supabase.from("product_images").delete().eq("product_id", product.id);
+    await supabase.from("product_sizes").delete().eq("product_id", product.id);
+    const { error } = await supabase.from("products").delete().eq("id", product.id);
+    if (error) {
+      notify(error.message + " Use Published = off when order history prevents deletion.");
+      return;
+    }
+    await loadAll();
+    notify("Product removed.");
+  }
+
+  async function setPayment(order: any, payment: any, status: string) {
+    if (!payment?.id) {
+      notify("No payment record is attached to this order.");
+      return;
+    }
+    const { error: paymentError } = await supabase.from("payments").update({ status }).eq("id", payment.id);
+    if (paymentError) {
+      notify(paymentError.message);
+      return;
+    }
+    const orderStatus = status === "paid" && order.order_status === "placed" ? "confirmed" : order.order_status;
+    const { error: orderError } = await supabase.from("orders").update({ payment_status: status, order_status: orderStatus }).eq("id", order.id);
+    if (orderError) {
+      notify(orderError.message);
+      return;
+    }
+    await loadAll();
+    notify("Payment marked " + status + ".");
+  }
+
+  async function addPromotion(event: React.FormEvent) {
+    event.preventDefault();
+    const { error } = await supabase.from("promotions").insert({
+      code: newPromotion.code.trim().toUpperCase(),
+      discount_percent: Number(newPromotion.discount_percent),
+      active: newPromotion.active
+    });
+    if (error) {
+      notify(error.message);
+      return;
+    }
+    setNewPromotion({ code: "", discount_percent: "10", active: true });
+    await loadAll();
+    notify("Promotion created.");
+  }
+
+  async function togglePromotion(promotion: any) {
+    const { error } = await supabase.from("promotions").update({ active: !promotion.active }).eq("id", promotion.id);
+    if (error) notify(error.message);
+    else { await loadAll(); notify(promotion.active ? "Promotion disabled." : "Promotion enabled."); }
   }
 
   async function updateStock(id: string, value: string) {
@@ -242,6 +302,7 @@ export default function AdminPage() {
     ["customers", "Customers"],
     ["support", "Support"],
     ["homepage", "Homepage"],
+    ["promotions", "Promotions"],
     ["settings", "Settings"]
   ];
 
@@ -340,7 +401,7 @@ export default function AdminPage() {
                     <div className="admin-product-main"><strong>{p.name}</strong><span>{p.sku || "No SKU"} · {p.team || "NEPKITS"} · {p.season || "—"}</span><small>{p.category?.name || "Uncategorised"}</small></div>
                     <div className="admin-product-price"><strong>{money(p.price)}</strong><span>{Number(p.discount_percent || 0) ? Math.round(Number(p.discount_percent)) + "% off" : "Full price"}</span></div>
                     <div className="admin-product-stock"><strong>{p.total_stock || 0}</strong><span>units</span></div>
-                    <div className="admin-row-actions"><button onClick={() => setEditing(p)}>Edit</button><span className={p.published ? "admin-pill success" : "admin-pill"}>{p.published ? "Published" : "Draft"}</span></div>
+                    <div className="admin-row-actions"><button onClick={() => setEditing(p)}>Edit</button><button onClick={() => deleteProduct(p)}>Remove</button><span className={p.published ? "admin-pill success" : "admin-pill"}>{p.published ? "Published" : "Draft"}</span></div>
                   </div>
                 ))}
               </div>
@@ -379,7 +440,11 @@ export default function AdminPage() {
                     <div className="admin-order-card-head"><div><span>{o.order_number}</span><strong>{o.full_name}</strong></div><b>{money(o.total)}</b></div>
                     <div className="admin-order-meta">{o.phone} · {o.area}, {o.city} · {o.address_text}</div>
                     <div className="admin-order-items">{(o.order_items || []).map((item: any) => <div key={item.id}><span>{item.product_name} · {item.size} × {item.quantity}</span><strong>{money(item.subtotal)}</strong></div>)}</div>
-                    <div className="admin-order-footer"><span className="admin-pill">{o.payment_method} · {o.payment_status}</span><select className="fashion-select compact" value={o.order_status} onChange={(e) => setOrderStatus(o.id, e.target.value)}>{ORDER_STATUSES.map((s) => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select></div>
+                    <div className="admin-payment-line">
+                      <span className="admin-pill">{o.payment_method} · {o.payment_status}</span>
+                      {o.payments?.[0]?.provider_transaction_id ? <small>Ref: {o.payments[0].provider_transaction_id}</small> : null}
+                      {o.payments?.[0] && <div className="admin-payment-actions"><button onClick={() => setPayment(o, o.payments[0], "paid")}>Verify</button><button onClick={() => setPayment(o, o.payments[0], "failed")}>Reject</button></div>}
+                    </div><div className="admin-order-footer"><select className="fashion-select compact" value={o.order_status} onChange={(e) => setOrderStatus(o.id, e.target.value)}>{ORDER_STATUSES.map((s) => <option key={s} value={s}>{s.replaceAll("_", " ")}</option>)}</select></div>
                   </article>
                 ))}
               </div>
@@ -426,6 +491,23 @@ export default function AdminPage() {
                 {selectedConversation ? <><div className="admin-panel-head"><div><div className="eyebrow">Conversation</div><h2>{selectedConversation.subject || "Support"}</h2></div></div><div className="admin-message-placeholder">Conversation ID: {selectedConversation.id}<br />Use the reply box below to respond through the live support system.</div><form className="admin-reply-form" onSubmit={sendReply}><textarea className="fashion-input textarea" value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Write a reply…" required /><button className="checkout-btn">SEND REPLY</button></form></> : <div className="admin-empty">Select a conversation.</div>}
               </section>
             </div>
+          </div>
+        )}
+
+        {section === "promotions" && (
+          <div className="admin-content">
+            <section className="admin-panel">
+              <div className="admin-panel-head"><div><div className="eyebrow">Promotions</div><h2>Coupon codes</h2></div></div>
+              <form className="admin-inline-form" onSubmit={addPromotion}>
+                <input className="fashion-input" value={newPromotion.code} onChange={(e) => setNewPromotion({ ...newPromotion, code: e.target.value })} placeholder="Code e.g. MATCH10" required />
+                <input className="fashion-input" type="number" min="0" max="100" value={newPromotion.discount_percent} onChange={(e) => setNewPromotion({ ...newPromotion, discount_percent: e.target.value })} placeholder="Discount %" required />
+                <button className="admin-toolbar-btn">Create</button>
+              </form>
+              <div className="admin-promo-list">
+                {promotions.map((promotion) => <div className="admin-promo-row" key={promotion.id}><div><strong>{promotion.code}</strong><span>{Number(promotion.discount_percent)}% off</span></div><button onClick={() => togglePromotion(promotion)}>{promotion.active ? "Disable" : "Enable"}</button></div>)}
+                {!promotions.length && <div className="admin-empty">No promotions have been created.</div>}
+              </div>
+            </section>
           </div>
         )}
 
