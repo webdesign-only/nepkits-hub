@@ -36,6 +36,16 @@ function Header(){
         <Link href='/shop?category=23e4996d-7e17-4cd9-9338-f4cebd4040ec'>FAN GEAR</Link>
       </div></nav>
     </header>
+      <div className='mobile-market-bar'>
+        <div className='mobile-market-top'>
+          <Link href='/' className='mobile-brand'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
+          <div className='mobile-actions'><LoginTrigger/><Link href='/cart' className='mobile-cart'><span>🛒</span><CartBadge/></Link></div>
+        </div>
+        <form action='/shop' className='mobile-search'><input name='q' placeholder='Search jerseys, clubs & World Cup…'/><button aria-label='Search'>⌕</button></form>
+        <div className='mobile-cats'>
+          <Link href='/shop'>ALL</Link><Link href='/shop?category=a201ec0c-b146-46c7-91fb-ca7c803e5330'>CLUBS</Link><Link href='/shop?category=3fe4a585-eca3-4c88-b73d-cadb5cbf608c'>WORLD CUP</Link><Link href='/shop?collection=sale'>DEALS</Link><Link href='/shop?collection=new'>NEW</Link>
+        </div>
+      </div>
     <LoginModal/>
   </>
 }
