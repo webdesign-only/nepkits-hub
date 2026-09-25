@@ -477,7 +477,7 @@ export default function Home() {
             <button className="nav-link" onClick={() => { setTab("shop"); setCat(categories.find((item) => /kit/i.test(item.name))?.id || ""); setMenuOpen(false); }}>Kits</button>
             <button className="nav-link" onClick={() => go("shop")}>Collections</button>
             <button className="nav-link" onClick={() => { setTab("shop"); setCat(""); setMenuOpen(false); }}>Best Sellers</button>
-            <button className="nav-link sale-link" onClick={() => { setTab("shop"); setCat(""); setQ(""); setMenuOpen(false); }}>Sale</button>
+            <button className="nav-link sale-link" onClick={() => { setTab("shop"); setCat(""); setQ(""); setMenuOpen(false); }}>Sale</button>{role === "admin" && <button className="nav-link admin-nav-link" onClick={() => { window.location.href = "/admin"; }}>Admin</button>}
           </nav>
 
           <div className="header-actions">
