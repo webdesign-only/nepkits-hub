@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect,useMemo,useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
+const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZnlnaHpxbGN3enlqdXF4amx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMzQzMjgsImV4cCI6MjEwNTkxMDMyOH0.w8B4QgZM1NytGm709lc-Aui5x-DV5VjTzW8JJDVIzr4');
 const money=(n:number|string)=>new Intl.NumberFormat('en-NP',{style:'currency',currency:'NPR',maximumFractionDigits:0}).format(Number(n));
 const imageFor=(p:any)=>p?.images?.find((x:any)=>x.is_primary)?.url??p?.images?.[0]?.url??'';
 function addCart(product:any,size:string){const current=JSON.parse(localStorage.getItem('nepkits-cart')||'[]');const i=current.findIndex((x:any)=>x.product.id===product.id&&x.size===size);if(i<0)current.push({product,size,quantity:1});else current[i].quantity+=1;localStorage.setItem('nepkits-cart',JSON.stringify(current))}
