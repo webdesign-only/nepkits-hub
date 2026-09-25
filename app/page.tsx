@@ -1,10 +1,96 @@
 'use client';
 import Link from 'next/link';
-import { useEffect,useMemo,useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZnlnaHpxbGN3enlqdXF4amx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMzQzMjgsImV4cCI6MjEwNTkxMDMyOH0.w8B4QgZM1NytGm709lc-Aui5x-DV5VjTzW8JJDVIzr4');
+import {useEffect,useMemo,useState} from 'react';
+
 const money=(n:number|string)=>new Intl.NumberFormat('en-NP',{style:'currency',currency:'NPR',maximumFractionDigits:0}).format(Number(n));
 const imageFor=(p:any)=>p?.images?.find((x:any)=>x.is_primary)?.url??p?.images?.[0]?.url??'';
-function addCart(product:any,size:string){const current=JSON.parse(localStorage.getItem('nepkits-cart')||'[]');const i=current.findIndex((x:any)=>x.product.id===product.id&&x.size===size);if(i<0)current.push({product,size,quantity:1});else current[i].quantity+=1;localStorage.setItem('nepkits-cart',JSON.stringify(current))}
-function Card({p}:{p:any}){return <article className='product-tile'><Link href={'/products/'+p.slug} className='product-photo-wrap'><img className='product-photo primary' src={imageFor(p)} alt={p.name}/>{p.new_arrival&&<span className='card-badge'>NEW</span>}</Link><div className='product-tile-copy'><small>{p.team||'NEPKITS'} {p.season?'· '+p.season:''}</small><h3>{p.name}</h3><div className='tile-price'><strong>{money(p.price)}</strong>{p.original_price&&<del>{money(p.original_price)}</del>}<span>{Number(p.discount_percent)>0?Math.round(Number(p.discount_percent))+'% OFF':'★ '+Number(p.rating||0).toFixed(1)}</span></div><button className='quick-add' onClick={()=>addCart(p,p.sizes?.find((s:any)=>Number(s.stock_qty)>0)?.size||'M')}>+ QUICK ADD</button></div></article>}
-export default function Home(){const [products,setProducts]=useState<any[]>([]);const [cats,setCats]=useState<any[]>([]);const [banner,setBanner]=useState<any>(null);const [settings,setSettings]=useState<any>(null);useEffect(()=>{(async()=>{try{const [catalog,b,s]=await Promise.all([fetch('/api/catalog',{cache:'no-store'}).then(r=>r.json()),supabase.from('homepage_banners').select('*').eq('active',true).order('sort_order').limit(1).maybeSingle(),supabase.from('store_settings').select('*').limit(1).maybeSingle()]);setProducts(catalog.products??[]);setCats(catalog.categories??[]);setBanner(b.data);setSettings(s.data)}catch(e){console.error('NEPKITS homepage data error',e)}})()},[]);const latest=products.filter(p=>p.new_arrival);const featured=products.filter(p=>p.featured);const best=useMemo(()=>[...products].sort((a,b)=>Number(b.sold_count||0)-Number(a.sold_count||0)),[products]);const hero=banner?.image_url||imageFor(featured[0]||products[0]);return <main className='new-home'><section className='home-hero'><img src={hero} alt='NEPKITS HUB campaign'/><div className='hero-shade'/><div className='home-hero-content'><span className='hero-side-label'>NK / 2026 COLLECTION</span><div className='hero-center'><span className='eyebrow-light'>{banner?.title||'FOOTBALL CULTURE'}</span><h1>THE SHIRT<br/><span>IS THE SIGNAL.</span></h1><p>{banner?.subtitle||settings?.tagline||'Premium jerseys, kits and sportswear made for matchday and beyond.'}</p><div className='hero-buttons'><Link href='/shop' className='red-button'>SHOP THE COLLECTION ↗</Link><Link href='/shop?collection=new' className='outline-button'>NEW ARRIVALS</Link></div></div><span className='hero-scroll'>SCROLL TO EXPLORE</span></div></section><div className='marquee-band'><div>NEPKITS HUB</div><div>FOOTBALL CULTURE</div><div>JERSEYS</div><div>KITS</div><div>TRAINING</div><div>RETRO</div><div>NEPKITS HUB</div></div><section className='home-section dark-section'><div className='wide-shell'><div className='section-header-white'><div><span>01 / COLLECTIONS</span><h2>FIND YOUR<br/><em>COLOURWAY.</em></h2></div><Link href='/shop'>VIEW ALL ↗</Link></div><div className='collection-rail'>{cats.slice(0,5).map((c,i)=>{const p=products.find(x=>x.category_id===c.id)||products[i];return <Link className='collection-tile' key={c.id} href={'/shop?category='+c.id}><img src={imageFor(p)} alt={c.name}/><div className='collection-tile-shade'/><div className='collection-tile-copy'><small>0{i+1} / COLLECTION</small><strong>{c.name}</strong><span>EXPLORE ↗</span></div></Link>})}</div></div></section><section className='home-section paper-section'><div className='wide-shell'><div className='feature-bento'><div className='feature-copy'><span>02 / THE LATEST DROP</span><h2>BUILT FOR<br/><strong>MATCHDAY.</strong></h2><p>Our latest football edit brings together new arrivals, fan favourites and the pieces that keep the game going after the final whistle.</p><Link href='/shop?collection=new' className='dark-button'>EXPLORE THE DROP ↗</Link></div><div className='feature-image tall'><img src={imageFor(latest[0]||featured[0]||products[0])} alt='Latest drop'/><div className='feature-caption'>NK / LATEST DROP</div></div><div className='feature-image'><img src={imageFor(best[1]||best[0]||products[1])} alt='Fan favourite'/><div className='feature-caption'>FAN FAVOURITE</div></div></div></div></section><section className='home-section paper-section pt0'><div className='wide-shell'><div className='section-header-dark'><div><span>03 / NEW ARRIVALS</span><h2>JUST <em>LANDED.</em></h2></div><Link href='/shop?collection=new'>SHOP NEW ↗</Link></div><div className='home-products'>{(latest.length?latest:featured).slice(0,4).map(p=><Card key={p.id} p={p}/>)}</div></div></section><section className='split-statement'><div className='split-art'><img src={imageFor(best[0]||products[0])} alt='Football culture'/></div><div className='split-copy'><span>04 / THE NEPKITS CODE</span><h2>NOT<br/><em>JUST</em><br/>A JERSEY.</h2><p>Wear the badge. Carry the culture. The collection is designed around football as identity, ritual and everyday style.</p><Link href='/shop' className='white-line-button'>SHOP ALL PRODUCTS ↗</Link></div></section><section className='home-section dark-section'><div className='wide-shell'><div className='section-header-white'><div><span>05 / FAN FAVOURITES</span><h2>THE<br/><em>ROTATION.</em></h2></div><Link href='/shop?collection=best'>SHOP BEST SELLERS ↗</Link></div><div className='home-products'>{best.slice(0,4).map(p=><Card key={p.id} p={p}/>)}</div></div></section><section className='signup-strip'><div className='wide-shell signup-inner'><div><span>06 / STAY IN THE LOOP</span><h2>FIRST LOOKS.<br/><em>NOISE OFF.</em></h2></div><form onSubmit={e=>e.preventDefault()}><input placeholder='YOUR EMAIL ADDRESS'/><button>JOIN ↗</button></form></div></section></main>}
+
+function addCart(product:any,size:string){const c=JSON.parse(localStorage.getItem('nepkits-cart')||'[]');const i=c.findIndex((x:any)=>x.product.id===product.id&&x.size===size);if(i<0)c.push({product,size,quantity:1});else c[i].quantity++;localStorage.setItem('nepkits-cart',JSON.stringify(c));}
+
+function ProductCard({p}:{p:any}){
+  return <article className='market-card'>
+    <Link href={'/products/'+p.slug} className='market-card-image'>
+      <img src={imageFor(p)} alt={p.name}/>
+      {Number(p.discount_percent)>0&&<span className='discount-tag'>{Math.round(Number(p.discount_percent))}% OFF</span>}
+      {p.new_arrival&&<span className='new-tag'>NEW</span>}
+      <span className='heart-tag'>♡</span>
+    </Link>
+    <div className='market-card-body'>
+      <div className='market-team'>{p.team||'NEPKITS'} <span>• {p.season||'2026'}</span></div>
+      <Link href={'/products/'+p.slug} className='market-name'>{p.name}</Link>
+      <div className='market-rating'><b>★ {Number(p.rating||0).toFixed(1)}</b><span>|</span><span>{Number(p.review_count||0)} ratings</span><span>|</span><span>{Number(p.sold_count||0)} sold</span></div>
+      <div className='market-price-row'><strong>{money(p.price)}</strong>{p.original_price&&<del>{money(p.original_price)}</del>}<span>{Number(p.discount_percent)>0?Math.round(Number(p.discount_percent))+'%':'Best price'}</span></div>
+      <div className='market-delivery'>🚚 Cash on Delivery • Nepal</div>
+      <button className='market-add' onClick={()=>addCart(p,p.sizes?.find((s:any)=>Number(s.stock_qty)>0)?.size||'M')}>ADD TO CART</button>
+    </div>
+  </article>
+}
+
+export default function Home(){
+ const [products,setProducts]=useState<any[]>([]);
+ const [categories,setCategories]=useState<any[]>([]);
+ useEffect(()=>{fetch('/api/catalog',{cache:'no-store'}).then(r=>r.json()).then(j=>{setProducts(j.products||[]);setCategories(j.categories||[])}).catch(()=>{})},[]);
+ const newest=products.filter(p=>p.new_arrival);
+ const best=useMemo(()=>[...products].sort((a,b)=>Number(b.sold_count||0)-Number(a.sold_count||0)),[products]);
+ const clubs=products.filter(p=>['FC Barcelona','Tottenham Hotspur','Inter Milan'].includes(p.team));
+ const worldCup=products.filter(p=>['Brazil','France','USA'].includes(p.team));
+ const hero=clubs[0]||products.find(p=>p.team==='Brazil')||products[0];
+ const categoryProducts=categories.map(c=>({...c,product:products.find(p=>p.category_id===c.id)})).filter(x=>x.product);
+
+ return <main className='market-home'>
+   <div className='market-shell home-main-grid'>
+     <aside className='home-category-panel'>
+       <div className='panel-title'>TOP CATEGORIES</div>
+       {categoryProducts.slice(0,8).map(c=><Link key={c.id} href={'/shop?category='+c.id}><span>{c.name}</span><b>›</b></Link>)}
+       <Link className='see-all' href='/shop'>VIEW ALL CATEGORIES →</Link>
+     </aside>
+     <section className='market-hero'>
+       <img src={imageFor(hero)} alt={hero?.name||'NEPKITS football collection'}/>
+       <div className='market-hero-overlay'/>
+       <div className='market-hero-copy'>
+         <span>FAN REPLICA COLLECTION • 2026</span>
+         <h1>WORLD'S BIGGEST<br/><em>FOOTBALL SHIRTS.</em></h1>
+         <p>Famous club jerseys + 2026 World Cup fanwear, built into the NEPKITS marketplace.</p>
+         <Link href='/shop' className='market-hero-btn'>SHOP NOW</Link>
+       </div>
+     </section>
+     <aside className='hero-deal-stack'>
+       <div><span>FLASH SALE</span><strong>UP TO 30% OFF</strong><Link href='/shop?collection=sale'>SHOP DEALS →</Link></div>
+       <div><span>COD</span><strong>DELIVERY ACROSS NEPAL</strong><small>Pay on delivery where available.</small></div>
+       <div><span>NEW</span><strong>WORLD CUP 2026</strong><Link href='/shop?category=3fe4a585-eca3-4c88-b73d-cadb5cbf608c'>EXPLORE →</Link></div>
+     </aside>
+   </div>
+
+   <div className='market-shell service-strip'><div><b>🚚</b><span><strong>Fast delivery</strong><small>Across Nepal</small></span></div><div><b>↺</b><span><strong>Easy returns</strong><small>Store policy applies</small></span></div><div><b>✓</b><span><strong>Secure payments</strong><small>COD + eSewa flow</small></span></div><div><b>★</b><span><strong>Fan favourites</strong><small>Best-selling jerseys</small></span></div></div>
+
+   <section className='market-section'>
+     <div className='market-shell'>
+       <div className='market-section-head'><div><span>SHOP BY COLLECTION</span><h2>FAMOUS CLUBS</h2></div><Link href='/shop?category=a201ec0c-b146-46c7-91fb-ca7c803e5330'>SEE ALL →</Link></div>
+       <div className='club-strip'>{clubs.map(p=><Link href={'/products/'+p.slug} key={p.id}><img src={imageFor(p)} alt={p.team}/><div><b>{p.team}</b><span>SHOP JERSEY →</span></div></Link>)}</div>
+     </div>
+   </section>
+
+   <section className='market-section gray'>
+     <div className='market-shell'>
+       <div className='market-section-head'><div><span>LIMITED-TIME OFFERS</span><h2>FLASH SALE</h2></div><div className='sale-timer'><b>00</b><i>:</i><b>32</b><i>:</i><b>47</b></div><Link href='/shop?collection=sale'>VIEW ALL →</Link></div>
+       <div className='market-grid five'>{(newest.length?newest:products).slice(0,5).map(p=><ProductCard key={p.id} p={p}/>)}</div>
+     </div>
+   </section>
+
+   <section className='market-section'>
+     <div className='market-shell'>
+       <div className='market-section-head'><div><span>FIFA WORLD CUP 2026</span><h2>WORLD CUP JERSEYS</h2></div><Link href='/shop?category=3fe4a585-eca3-4c88-b73d-cadb5cbf608c'>SHOP ALL →</Link></div>
+       <div className='market-grid three-feature'>{worldCup.map(p=><ProductCard key={p.id} p={p}/>)}</div>
+     </div>
+   </section>
+
+   <section className='market-section gray'>
+     <div className='market-shell'>
+       <div className='market-section-head'><div><span>HOT RIGHT NOW</span><h2>BEST SELLERS</h2></div><Link href='/shop?collection=best'>VIEW ALL →</Link></div>
+       <div className='market-grid five'>{best.slice(0,10).map(p=><ProductCard key={p.id} p={p}/>)}</div>
+     </div>
+   </section>
+
+   <section className='market-cta'><div className='market-shell'><div><span>NEPKITS HUB</span><h2>ONE MARKETPLACE.<br/><em>EVERY SHIRT.</em></h2><p>Club football, national teams, retro drops, training wear and matchday accessories.</p></div><Link href='/shop' className='market-cta-btn'>START SHOPPING →</Link></div></section>
+ </main>
+}
