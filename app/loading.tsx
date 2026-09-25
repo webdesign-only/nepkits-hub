@@ -5,7 +5,7 @@ export default function Loading(){
     <div className='loader-noise'/>
     <div className='loader-inner'>
       <div className='loader-logo-frame'>
-        <img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/>
+        <img src='/nepkits-logo.webp' alt='NEPKITS HUB'/>
       </div>
       <div className='loader-kicker'>NEPKITS HUB • FOOTBALL MARKETPLACE</div>
       <h1>READY FOR<br/><em>MATCHDAY.</em></h1>
