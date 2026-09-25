@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import CartBadge from '../components/cart-badge';
 import LoginModal from '../components/login-modal';
 import LoginTrigger from '../components/login-trigger';
 import CartDrawer from '../components/cart-drawer';
@@ -58,7 +57,7 @@ function Footer(){
     <div className='market-shell footer-grid'>
       <div><NepkitsBrand variant='footer'/><p>NEPKITS matchday gear, club jerseys, World Cup fanwear and football essentials for Nepal.</p></div>
       <div><h4>SHOP</h4><Link href='/shop'>All products</Link><Link href='/shop?collection=new'>New arrivals</Link><Link href='/shop?collection=sale'>Deals</Link></div>
-      <div><h4>HELP</h4><Link href='/account'>Account</Link><Link href='/orders'>Orders</Link><CartTrigger className='footer-cart-trigger'/><Link href='/checkout'>Checkout</Link></div>
+      <div><h4>HELP</h4><Link href='/account'>Account</Link><Link href='/orders'>Orders</Link><CartTrigger className='footer-cart-trigger' footer/><Link href='/checkout'>Checkout</Link></div>
       <div><h4>PAYMENT</h4><span>Cash on Delivery</span><span>eSewa where configured</span><span>Secure checkout</span></div>
     </div>
     <div className='market-footer-bottom'><div className='market-shell'><span>© 2026 NEPKITS HUB</span><span>Made for matchday in Nepal.</span></div></div>
