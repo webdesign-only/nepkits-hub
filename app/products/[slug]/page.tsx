@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { addToCart } from '../../../lib/cart';
 import { money } from '../../../lib/store-utils';
-import { supabase } from '../../../lib/supabase-browser';
 import type { Product } from '../../../lib/types';
 
 export default function ProductPage() {
