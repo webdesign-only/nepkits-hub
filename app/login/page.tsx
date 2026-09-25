@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {createClient} from '@supabase/supabase-js';
+import NepkitsBrand from '../../components/nepkits-brand';
 
 const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
 
@@ -44,7 +45,7 @@ export default function LoginPage(){
 
   <section className='modern-auth-panel'>
    <div className='auth-panel-top'>
-    <Link href='/' className='auth-brand'><span className='auth-brand-frame'><img src='/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
+    <Link href='/' className='auth-brand' aria-label='NEPKITS HUB home'><NepkitsBrand variant='compact'/></Link>
     <Link href='/shop' className='auth-shop-link'>CONTINUE SHOPPING →</Link>
    </div>
 
