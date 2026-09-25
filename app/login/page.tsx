@@ -2,10 +2,9 @@
 import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
-import {createClient} from '@supabase/supabase-js';
 import NepkitsBrand from '../../components/nepkits-brand';
+import { supabase } from '../../lib/supabase-browser';
 
-const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
 
 export default function LoginPage(){
  const router=useRouter();
