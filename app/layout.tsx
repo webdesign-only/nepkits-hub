@@ -13,11 +13,11 @@ export const metadata:Metadata={
 function Header(){
   return <>
     <header className='market-header'>
-      <div className='market-top'><div className='market-top-inner'><span>NEPKITS HUB • FOOTBALL MARKETPLACE</span><div><Link href='/orders'>TRACK ORDER</Link><Link href='/account'>HELP</Link><Link href='/account'>SELL WITH US</Link></div></div></div>
+      <div className='market-top'><div className='market-top-inner'><span>NEPKITS HUB • MATCHDAY FOOTBALL STORE</span><div><Link href='/orders'>TRACK ORDER</Link><Link href='/account'>HELP</Link><Link href='/account'>SELL WITH US</Link></div></div></div>
       <div className='market-main'>
         <div className='market-shell market-main-inner'>
           <Link href='/' className='market-logo'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
-          <form action='/shop' className='market-search'><input name='q' placeholder='Search jerseys, clubs, players, World Cup…'/><button>SEARCH</button></form>
+          <form action='/shop' className='market-search'><input name='q' placeholder='Search NEPKITS jerseys, clubs & World Cup…'/><button>SEARCH</button></form>
           <div className='market-actions'>
             <LoginTrigger/>
             <Link href='/orders'><span>↗</span><b>Orders</b></Link>
@@ -53,12 +53,12 @@ function Header(){
 function Footer(){
   return <footer className='market-footer'>
     <div className='market-shell footer-grid'>
-      <div><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/><p>Football jerseys, club shirts, World Cup fanwear and training gear for Nepal.</p></div>
+      <div><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/><p>NEPKITS matchday gear, club jerseys, World Cup fanwear and football essentials for Nepal.</p></div>
       <div><h4>SHOP</h4><Link href='/shop'>All products</Link><Link href='/shop?collection=new'>New arrivals</Link><Link href='/shop?collection=sale'>Deals</Link></div>
       <div><h4>HELP</h4><Link href='/account'>Account</Link><Link href='/orders'>Orders</Link><Link href='/cart'>Cart</Link><Link href='/checkout'>Checkout</Link></div>
       <div><h4>PAYMENT</h4><span>Cash on Delivery</span><span>eSewa where configured</span><span>Secure checkout</span></div>
     </div>
-    <div className='market-footer-bottom'><div className='market-shell'><span>© 2026 NEPKITS HUB</span><span>Built for football fans in Nepal.</span></div></div>
+    <div className='market-footer-bottom'><div className='market-shell'><span>© 2026 NEPKITS HUB</span><span>Made for matchday in Nepal.</span></div></div>
   </footer>
 }
 
