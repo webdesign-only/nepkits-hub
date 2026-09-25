@@ -14,6 +14,7 @@ export default function ProductCard({ product }: { product: Product }) {
   function handleAdd() {
     if (!defaultSize) return;
     addToCart(product, defaultSize);
+    window.dispatchEvent(new Event('nepkits:open-cart'));
     setAdded(true);
     window.setTimeout(() => setAdded(false), 900);
   }
