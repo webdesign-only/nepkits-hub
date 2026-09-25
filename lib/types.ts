@@ -32,6 +32,7 @@ export type Product = {
   sizes?: ProductSize[];
   images?: ProductImage[];
   category_id?: string | null;
+  created_at?: string | null;
   material?: string | null;
   fit?: string | null;
   care_instructions?: string | null;
