@@ -323,3 +323,17 @@ html,body{overflow-x:hidden}
 @media (min-width:768px){
   .mobile-market-bar{display:none}
 }
+
+@media(max-width:767px){
+  body{padding-bottom:58px}
+  .mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:95;height:58px;background:#111;color:#fff;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #292929;box-shadow:0 -8px 24px rgba(0,0,0,.16)}
+  .mobile-bottom-nav>a,.mobile-bottom-nav>button{border:0;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;text-decoration:none}
+  .mobile-bottom-nav span{font-size:17px;line-height:1}
+  .mobile-bottom-nav b{font-size:6px;letter-spacing:.1em}
+  .mobile-bottom-nav .market-cart-count{top:7px;right:calc(50% - 18px)}
+  .mobile-bottom-cart{padding-bottom:0!important}
+  .mobile-bottom-nav .market-account-button{width:100%;height:100%;color:#fff}
+  .mobile-bottom-nav .market-account-button span{font-size:17px}
+  .mobile-bottom-nav .market-account-button b{font-size:6px}
+}
+@media(min-width:768px){.mobile-bottom-nav{display:none}}
