@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import CartBadge from '../components/cart-badge';
+import LoginModal from '../components/login-modal';
 import './globals.css';
 
 export const metadata:Metadata={
@@ -9,14 +10,14 @@ export const metadata:Metadata={
 };
 
 function Header(){
-  return <header className='market-header'>
+  return <><header className='market-header'>
     <div className='market-top'><div className='market-top-inner'><span>NEPKITS HUB • FOOTBALL MARKETPLACE</span><div><Link href='/orders'>TRACK ORDER</Link><Link href='/account'>HELP</Link><Link href='/account'>SELL WITH US</Link></div></div></div>
     <div className='market-main'>
       <div className='market-shell market-main-inner'>
         <Link href='/' className='market-logo'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
         <form action='/shop' className='market-search'><input name='q' placeholder='Search jerseys, clubs, players, World Cup…'/><button>SEARCH</button></form>
         <div className='market-actions'>
-          <Link href='/login'><span>◯</span><b>Account</b></Link>
+          <button type='button' className='market-account-button' onClick={()=>window.dispatchEvent(new Event('nepkits:login'))}><span>◯</span><b>Account</b></button>
           <Link href='/orders'><span>↗</span><b>Orders</b></Link>
           <Link href='/cart' className='market-cart'><span>🛒</span><b>Cart</b><CartBadge/></Link>
         </div>
