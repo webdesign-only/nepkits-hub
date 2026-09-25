@@ -58,6 +58,9 @@ export default function Home() {
   });
   const [zoneId, setZoneId] = useState("");
   const [payment, setPayment] = useState("cod");
+  const [couponCode, setCouponCode] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [adminOrders, setAdminOrders] = useState<Order[]>([]);
@@ -286,6 +289,17 @@ export default function Home() {
       setMessage("Select an active delivery zone.");
       return;
     }
+    if (payment === "esewa" && (!paymentReference.trim() || !paymentProof)) {
+      setMessage("For eSewa, enter the transaction/reference number and upload the payment screenshot.");
+      return;
+    }
+    if (paymentProof) {
+      const allowed = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowed.includes(paymentProof.type) || paymentProof.size > 5 * 1024 * 1024) {
+        setMessage("Payment screenshot must be JPG, PNG or WebP and under 5 MB.");
+        return;
+      }
+    }
 
     setBusy(true);
     const { data, error } = await supabase.rpc("place_order", {
@@ -298,15 +312,42 @@ export default function Home() {
       p_address_id: addresses[0].id,
       p_delivery_zone_id: zoneId,
       p_payment_method: payment,
-      p_coupon_code: null,
+      p_coupon_code: couponCode.trim() || null,
     });
-    setBusy(false);
-
     if (error) {
+      setBusy(false);
       setMessage(error.message);
       return;
     }
+
+    if (payment === "esewa" && paymentProof && data?.id) {
+      const extension = paymentProof.name.split(".").pop()?.toLowerCase() || "png";
+      const path = user.id + "/" + data.id + "/" + Date.now() + "-payment-proof." + extension;
+      const upload = await supabase.storage.from("private-documents").upload(path, paymentProof, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: paymentProof.type
+      });
+      if (upload.error) {
+        setBusy(false);
+        setMessage("Order created, but payment proof could not be uploaded. Please contact support with order " + data.order_number + ".");
+        return;
+      }
+
+      const { data: paymentRow } = await supabase.from("payments").select("id,metadata").eq("order_id", data.id).maybeSingle();
+      if (paymentRow?.id) {
+        await supabase.from("payments").update({
+          provider_transaction_id: paymentReference.trim(),
+          metadata: { ...(paymentRow.metadata || {}), transaction_reference: paymentReference.trim(), screenshot_path: path }
+        }).eq("id", paymentRow.id);
+      }
+    }
+
+    setBusy(false);
     setCart([]);
+    setCouponCode("");
+    setPaymentReference("");
+    setPaymentProof(null);
     await loadUser(user);
     setTab("orders");
     setMessage("Order " + data.order_number + " created.");
@@ -677,10 +718,19 @@ export default function Home() {
                     <div className="summary-divider" />
                     <div className="summary-row total"><span>Total</span><strong>{money(subtotal)}</strong></div>
                     <select className="fashion-select" value={zoneId} onChange={(e) => setZoneId(e.target.value)}>{zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name} — {money(zone.delivery_fee)}</option>)}</select>
+                    <div className="coupon-box">
+                      <div className="eyebrow">Promotion</div>
+                      <input className="fashion-input" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="Coupon code" />
+                      <small className="muted-line">Valid store promotions are verified during order creation.</small>
+                    </div>
                     <div className="payment-row">
                       <button className={payment === "cod" ? "pay active" : "pay"} onClick={() => setPayment("cod")}>Cash on delivery</button>
                       <button className={payment === "esewa" ? "pay active" : "pay"} onClick={() => setPayment("esewa")}>eSewa</button>
                     </div>
+                    {payment === "esewa" && <div className="payment-proof">
+                      <input className="fashion-input" value={paymentReference} onChange={(e) => setPaymentReference(e.target.value)} placeholder="eSewa transaction/reference number" />
+                      <label className="proof-upload"><span>Payment screenshot</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setPaymentProof(e.target.files?.[0] || null)} /><small>{paymentProof ? paymentProof.name : "JPG, PNG or WebP · max 5 MB"}</small></label>
+                    </div>}
                     <button className="checkout-btn" onClick={checkout} disabled={busy}>{busy ? "Creating order…" : "CHECKOUT"}</button>
                   </aside>
                 </div>
