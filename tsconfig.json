@@ -10,7 +10,6 @@
     "resolveJsonModule":true,
     "jsx":"preserve",
     "skipLibCheck":true,
-    "baseUrl":".",
     "paths":{"@/*":["./*"]},
     "plugins":[{"name":"next"}]
   },
