@@ -12,7 +12,7 @@ function Header(){
     <div className='market-top'><div className='market-top-inner'><span>NEPKITS HUB • FOOTBALL MARKETPLACE</span><div><Link href='/orders'>TRACK ORDER</Link><Link href='/account'>HELP</Link><Link href='/account'>SELL WITH US</Link></div></div></div>
     <div className='market-main'>
       <div className='market-shell market-main-inner'>
-        <Link href='/' className='market-logo'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></Link>
+        <Link href='/' className='market-logo'><span className='market-logo-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
         <form action='/shop' className='market-search'><input name='q' placeholder='Search jerseys, clubs, players, World Cup…'/><button>SEARCH</button></form>
         <div className='market-actions'>
           <Link href='/login'><span>◯</span><b>Account</b></Link>
