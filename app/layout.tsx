@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import CartBadge from '../components/cart-badge';
 import './globals.css';
 
 export const metadata:Metadata={
@@ -17,7 +18,7 @@ function Header(){
         <div className='market-actions'>
           <Link href='/login'><span>◯</span><b>Account</b></Link>
           <Link href='/orders'><span>↗</span><b>Orders</b></Link>
-          <Link href='/cart' className='market-cart'><span>🛒</span><b>Cart</b></Link>
+          <Link href='/cart' className='market-cart'><span>🛒</span><b>Cart</b><CartBadge/></Link>
         </div>
       </div>
     </div>
