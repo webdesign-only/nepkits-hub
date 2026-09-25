@@ -4,6 +4,7 @@ import CartBadge from '../components/cart-badge';
 import LoginModal from '../components/login-modal';
 import LoginTrigger from '../components/login-trigger';
 import CartDrawer from '../components/cart-drawer';
+import CartTrigger from '../components/cart-trigger';
 import './globals.css';
 
 export const metadata:Metadata={
@@ -21,7 +22,7 @@ function Header(){
           <div className='market-actions'>
             <LoginTrigger/>
             <Link href='/orders'><span>↗</span><b>Orders</b></Link>
-            <button type='button' className='market-cart cart-open-trigger' onClick={()=>window.dispatchEvent(new Event('nepkits:open-cart'))}><span>🛒</span><b>Cart</b><CartBadge/></button>
+            <CartTrigger/>
           </div>
         </div>
       </div>
@@ -39,7 +40,7 @@ function Header(){
       <div className='mobile-market-bar'>
         <div className='mobile-market-top'>
           <Link href='/' className='mobile-brand'><span className='market-logo-frame'><img src='/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
-          <div className='mobile-actions'><LoginTrigger/><button type='button' className='mobile-cart cart-open-trigger' onClick={()=>window.dispatchEvent(new Event('nepkits:open-cart'))}><span>🛒</span><CartBadge/></button></div>
+          <div className='mobile-actions'><LoginTrigger/><CartTrigger className='mobile-cart' mobile/></div>
         </div>
         <form action='/shop' className='mobile-search'><input name='q' placeholder='Search jerseys, clubs & World Cup…'/><button aria-label='Search'>⌕</button></form>
         <div className='mobile-cats'>
@@ -56,7 +57,7 @@ function Footer(){
     <div className='market-shell footer-grid'>
       <div><img src='/nepkits-logo.webp' alt='NEPKITS HUB'/><p>NEPKITS matchday gear, club jerseys, World Cup fanwear and football essentials for Nepal.</p></div>
       <div><h4>SHOP</h4><Link href='/shop'>All products</Link><Link href='/shop?collection=new'>New arrivals</Link><Link href='/shop?collection=sale'>Deals</Link></div>
-      <div><h4>HELP</h4><Link href='/account'>Account</Link><Link href='/orders'>Orders</Link><button type='button' className='footer-cart-trigger' onClick={()=>window.dispatchEvent(new Event('nepkits:open-cart'))}>Cart</button><Link href='/checkout'>Checkout</Link></div>
+      <div><h4>HELP</h4><Link href='/account'>Account</Link><Link href='/orders'>Orders</Link><CartTrigger className='footer-cart-trigger'/><Link href='/checkout'>Checkout</Link></div>
       <div><h4>PAYMENT</h4><span>Cash on Delivery</span><span>eSewa where configured</span><span>Secure checkout</span></div>
     </div>
     <div className='market-footer-bottom'><div className='market-shell'><span>© 2026 NEPKITS HUB</span><span>Made for matchday in Nepal.</span></div></div>
