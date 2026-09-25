@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import {createClient} from '@supabase/supabase-js';
+import NepkitsBrand from './nepkits-brand';
 
 const supabase=createClient('https://iyfyghzqlcwzyjuqxjlu.supabase.co','sb_publishable_1JP2P6NgeRAf5ADPjJH78g_KkVa5MzE');
 
@@ -47,7 +48,7 @@ export default function LoginModal(){
  return <div className='login-popover-backdrop' onMouseDown={e=>{if(e.target===e.currentTarget)setOpen(false)}}>
   <div className='login-popover' role='dialog' aria-modal='true' aria-label='NEPKITS HUB login'>
    <button className='login-popover-close' onClick={()=>setOpen(false)} aria-label='Close'>×</button>
-   <span className='login-popover-brand'><img src='/nepkits-logo.webp' alt='NEPKITS HUB'/></span>
+   <span className='login-popover-brand'><NepkitsBrand variant='compact'/></span>
    <div className='login-popover-tabs'><button className={!signup?'active':''} onClick={()=>{setSignup(false);setMessage('')}}>SIGN IN</button><button className={signup?'active':''} onClick={()=>{setSignup(true);setMessage('')}}>CREATE ACCOUNT</button></div>
    <div className='login-popover-title'>{signup?'Create your account':'Welcome back'}</div>
    <div className='login-popover-sub'>{signup?'Checkout faster and track your orders.':'Sign in to access your account and orders.'}</div>
