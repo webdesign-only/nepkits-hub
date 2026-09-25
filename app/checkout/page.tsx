@@ -22,6 +22,13 @@ type DeliveryZone = {
   delivery_fee: number | string;
 };
 
+const steps = [
+  { number: '01', label: 'DELIVERY' },
+  { number: '02', label: 'AREA' },
+  { number: '03', label: 'PAYMENT' },
+  { number: '04', label: 'PROMO' },
+];
+
 export default function Checkout() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -74,11 +81,19 @@ export default function Checkout() {
   const subtotal = useMemo(
     () =>
       items.reduce(
-        (total, item) => total + Number(item.product.price || 0) * item.quantity,
+        (total, item) =>
+          total + Number(item.product.price || 0) * item.quantity,
         0,
       ),
     [items],
   );
+
+  const totalUnits = useMemo(
+    () => items.reduce((total, item) => total + Number(item.quantity || 0), 0),
+    [items],
+  );
+
+  const selectedZone = zones.find((zone) => zone.id === zoneId);
 
   async function placeOrder() {
     setError('');
@@ -100,18 +115,21 @@ export default function Checkout() {
 
     setBusy(true);
 
-    const { data: order, error: orderError } = await supabase.rpc('place_order', {
-      p_user_id: user.id,
-      p_items: items.map((item) => ({
-        product_id: item.product.id,
-        size: item.size,
-        quantity: item.quantity,
-      })),
-      p_address_id: addressId,
-      p_delivery_zone_id: zoneId,
-      p_payment_method: payment,
-      p_coupon_code: coupon.trim() || null,
-    });
+    const { data: order, error: orderError } = await supabase.rpc(
+      'place_order',
+      {
+        p_user_id: user.id,
+        p_items: items.map((item) => ({
+          product_id: item.product.id,
+          size: item.size,
+          quantity: item.quantity,
+        })),
+        p_address_id: addressId,
+        p_delivery_zone_id: zoneId,
+        p_payment_method: payment,
+        p_coupon_code: coupon.trim() || null,
+      },
+    );
 
     if (orderError) {
       setBusy(false);
@@ -121,7 +139,14 @@ export default function Checkout() {
 
     if (payment === 'esewa' && proof) {
       const extension = proof.name.split('.').pop() || 'png';
-      const path = user.id + '/' + order.id + '/' + Date.now() + '-payment-proof.' + extension;
+      const path =
+        user.id +
+        '/' +
+        order.id +
+        '/' +
+        Date.now() +
+        '-payment-proof.' +
+        extension;
 
       const upload = await supabase.storage
         .from('private-documents')
@@ -159,16 +184,19 @@ export default function Checkout() {
 
   if (!items.length) {
     return (
-      <main className="checkout-page">
-        <div className="wide-shell">
-          <div className="empty-bag">
-            <h2>
+      <main className="checkout-page checkout-page-empty">
+        <div className="checkout-empty-shell">
+          <span className="checkout-kicker">NEPKITS HUB / CHECKOUT</span>
+          <div className="checkout-empty-card">
+            <div className="checkout-empty-number">00</div>
+            <h1>
               YOUR BAG
               <br />
               <em>IS EMPTY.</em>
-            </h2>
-            <Link href="/shop" className="dark-button">
-              BACK TO SHOP
+            </h1>
+            <p>Add your matchday picks first, then come back here to finish the order.</p>
+            <Link href="/shop" className="checkout-primary-link">
+              SHOP JERSEYS <span>→</span>
             </Link>
           </div>
         </div>
@@ -177,116 +205,177 @@ export default function Checkout() {
   }
 
   return (
-    <main className="checkout-page">
-      <div className="wide-shell">
-        <div className="checkout-heading">
+    <main className="checkout-page checkout-page-new">
+      <div className="checkout-shell">
+        <header className="checkout-top">
           <div>
-            <span>CHECKOUT / {items.length} ITEMS</span>
+            <Link href="/shop" className="checkout-back-link">
+              ← BACK TO SHOP
+            </Link>
+            <span className="checkout-kicker">NEPKITS HUB / SECURE CHECKOUT</span>
             <h1>
               FINISH
               <br />
               <em>THE ORDER.</em>
             </h1>
           </div>
+
+          <div className="checkout-top-meta">
+            <span>01</span>
+            <strong>{String(totalUnits).padStart(2, '0')} ITEMS</strong>
+            <small>READY FOR MATCHDAY</small>
+          </div>
+        </header>
+
+        <nav className="checkout-progress" aria-label="Checkout progress">
+          {steps.map((step, index) => (
+            <div className="checkout-progress-step" key={step.number}>
+              <span>{step.number}</span>
+              <strong>{step.label}</strong>
+              {index < steps.length - 1 && <i />}
+            </div>
+          ))}
+        </nav>
+
+        <div className="checkout-trust-strip">
+          <span>✓ SECURE CHECKOUT</span>
+          <span>✓ CASH ON DELIVERY</span>
+          <span>✓ ESEWA AVAILABLE</span>
+          <span>✓ NEPAL DELIVERY</span>
         </div>
 
-        <div className="checkout-layout">
-          <section>
-            <div className="checkout-block">
-              <div className="checkout-block-title">
-                <span>01</span>
+        <div className="checkout-grid-new">
+          <section className="checkout-main-column">
+            <div className="checkout-card-new">
+              <div className="checkout-card-head-new">
+                <div className="checkout-step-badge">01</div>
                 <div>
-                  <h2>DELIVERY</h2>
-                  <p>Select a saved address.</p>
+                  <span>DELIVERY</span>
+                  <h2>WHERE SHOULD WE SEND IT?</h2>
                 </div>
               </div>
 
-              {addresses.map((address) => (
-                <button
-                  type="button"
-                  className={
-                    addressId === address.id
-                      ? 'address-selected'
-                      : 'address-options-btn'
-                  }
-                  key={address.id}
-                  onClick={() => setAddressId(address.id)}
-                >
-                  <strong>{address.full_name}</strong>
-                  <span>{address.phone}</span>
-                  <small>
-                    {address.address_text}, {address.area}, {address.city}
-                  </small>
-                </button>
-              ))}
-
-              {!addresses.length && (
-                <div className="checkout-empty">
-                  No saved address. <Link href="/account">Add one to your account.</Link>
+              {addresses.length ? (
+                <div className="checkout-address-grid">
+                  {addresses.map((address) => (
+                    <button
+                      type="button"
+                      key={address.id}
+                      className={
+                        addressId === address.id
+                          ? 'checkout-address selected'
+                          : 'checkout-address'
+                      }
+                      onClick={() => setAddressId(address.id)}
+                    >
+                      <span className="checkout-radio">
+                        {addressId === address.id ? '✓' : ''}
+                      </span>
+                      <div>
+                        <strong>{address.full_name}</strong>
+                        <span>{address.phone}</span>
+                        <small>
+                          {address.address_text}, {address.area}, {address.city}
+                        </small>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="checkout-inline-empty">
+                  <strong>NO SAVED ADDRESS</strong>
+                  <span>Add one to your account before placing the order.</span>
+                  <Link href="/account">ADD ADDRESS →</Link>
                 </div>
               )}
             </div>
 
-            <div className="checkout-block">
-              <div className="checkout-block-title">
-                <span>02</span>
+            <div className="checkout-card-new">
+              <div className="checkout-card-head-new">
+                <div className="checkout-step-badge">02</div>
                 <div>
-                  <h2>DELIVERY AREA</h2>
-                  <p>Live store configuration.</p>
+                  <span>DELIVERY AREA</span>
+                  <h2>CHOOSE YOUR ZONE</h2>
                 </div>
               </div>
 
-              <select
-                className="checkout-select"
-                value={zoneId}
-                onChange={(event) => setZoneId(event.target.value)}
-              >
-                {zones.map((zone) => (
-                  <option key={zone.id} value={zone.id}>
-                    {zone.name} · {money(zone.delivery_fee)}
-                  </option>
-                ))}
-              </select>
+              <div className="checkout-zone-row">
+                <select
+                  value={zoneId}
+                  onChange={(event) => setZoneId(event.target.value)}
+                  className="checkout-zone-select"
+                >
+                  {zones.map((zone) => (
+                    <option key={zone.id} value={zone.id}>
+                      {zone.name} · {money(zone.delivery_fee)} delivery
+                    </option>
+                  ))}
+                </select>
+                <div className="checkout-zone-note">
+                  <strong>{selectedZone?.name || 'SELECT A ZONE'}</strong>
+                  <span>Delivery fee is controlled by the store zone.</span>
+                </div>
+              </div>
             </div>
 
-            <div className="checkout-block">
-              <div className="checkout-block-title">
-                <span>03</span>
+            <div className="checkout-card-new">
+              <div className="checkout-card-head-new">
+                <div className="checkout-step-badge">03</div>
                 <div>
-                  <h2>PAYMENT</h2>
-                  <p>Choose a method.</p>
+                  <span>PAYMENT</span>
+                  <h2>HOW WOULD YOU LIKE TO PAY?</h2>
                 </div>
               </div>
 
-              <div className="payment-choice">
+              <div className="checkout-payment-grid">
                 <button
                   type="button"
-                  className={payment === 'cod' ? 'selected' : ''}
+                  className={
+                    payment === 'cod'
+                      ? 'checkout-payment selected'
+                      : 'checkout-payment'
+                  }
                   onClick={() => setPayment('cod')}
                 >
+                  <span className="checkout-payment-icon">COD</span>
                   <strong>CASH ON DELIVERY</strong>
-                  <span>Pay when the order arrives.</span>
+                  <small>Pay when your order arrives.</small>
+                  <b>{payment === 'cod' ? 'SELECTED ✓' : 'SELECT'}</b>
                 </button>
+
                 <button
                   type="button"
-                  className={payment === 'esewa' ? 'selected' : ''}
+                  className={
+                    payment === 'esewa'
+                      ? 'checkout-payment selected'
+                      : 'checkout-payment'
+                  }
                   onClick={() => setPayment('esewa')}
                 >
+                  <span className="checkout-payment-icon esewa">eS</span>
                   <strong>ESEWA</strong>
-                  <span>Reference + proof required.</span>
+                  <small>Reference number + payment proof.</small>
+                  <b>{payment === 'esewa' ? 'SELECTED ✓' : 'SELECT'}</b>
                 </button>
               </div>
 
               {payment === 'esewa' && (
-                <div className="esewa-proof">
-                  <input
-                    className="checkout-input"
-                    value={reference}
-                    onChange={(event) => setReference(event.target.value)}
-                    placeholder="Transaction / reference number"
-                  />
+                <div className="checkout-esewa-panel">
                   <label>
-                    <span>{proof?.name || 'UPLOAD PAYMENT SCREENSHOT'}</span>
+                    <span>TRANSACTION / REFERENCE NUMBER</span>
+                    <input
+                      className="checkout-input-new"
+                      value={reference}
+                      onChange={(event) => setReference(event.target.value)}
+                      placeholder="Enter your eSewa reference"
+                    />
+                  </label>
+
+                  <label className="checkout-upload">
+                    <span>PAYMENT SCREENSHOT</span>
+                    <strong>
+                      {proof?.name || 'UPLOAD IMAGE'} <b>↑</b>
+                    </strong>
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
@@ -299,63 +388,107 @@ export default function Checkout() {
               )}
             </div>
 
-            <div className="checkout-block">
-              <div className="checkout-block-title">
-                <span>04</span>
+            <div className="checkout-card-new checkout-promo-card">
+              <div className="checkout-card-head-new">
+                <div className="checkout-step-badge">04</div>
                 <div>
-                  <h2>PROMOTION</h2>
-                  <p>Codes are verified server-side.</p>
+                  <span>PROMOTION</span>
+                  <h2>HAVE A CODE?</h2>
                 </div>
               </div>
 
-              <input
-                className="checkout-input"
-                value={coupon}
-                onChange={(event) => setCoupon(event.target.value.toUpperCase())}
-                placeholder="COUPON CODE"
-              />
+              <div className="checkout-promo-row">
+                <input
+                  className="checkout-input-new"
+                  value={coupon}
+                  onChange={(event) => setCoupon(event.target.value.toUpperCase())}
+                  placeholder="ENTER COUPON CODE"
+                />
+                <span>✓ VERIFIED SERVER-SIDE</span>
+              </div>
             </div>
+
+            {error && (
+              <div className="checkout-error-new">
+                <strong>CHECKOUT NEEDS YOUR ATTENTION</strong>
+                <span>{error}</span>
+              </div>
+            )}
           </section>
 
-          <aside className="checkout-summary">
-            <span>ORDER SUMMARY</span>
-
-            {items.map((item) => (
-              <div
-                className="checkout-item"
-                key={item.product.id + '-' + item.size}
-              >
-                <img
-                  src={item.product.images?.[0]?.url || ''}
-                  alt={item.product.name || 'Product'}
-                />
-                <div>
-                  <strong>{item.product.name}</strong>
-                  <span>
-                    SIZE {item.size} · QTY {item.quantity}
-                  </span>
-                </div>
-                <b>{money(Number(item.product.price) * item.quantity)}</b>
-              </div>
-            ))}
-
-            <hr />
-
-            <div className="sum-total">
-              <span>TOTAL</span>
-              <strong>{money(subtotal)}</strong>
+          <aside className="checkout-summary-new">
+            <div className="checkout-summary-top">
+              <span>YOUR BAG</span>
+              <strong>{String(totalUnits).padStart(2, '0')} ITEMS</strong>
             </div>
 
-            {error && <div className="checkout-error">{error}</div>}
+            <div className="checkout-summary-list">
+              {items.map((item) => (
+                <article
+                  className="checkout-summary-item"
+                  key={item.product.id + '-' + item.size}
+                >
+                  <div className="checkout-summary-image">
+                    <img
+                      src={item.product.images?.[0]?.url || ''}
+                      alt={item.product.name || 'Product'}
+                    />
+                    <span>{item.quantity}</span>
+                  </div>
+                  <div className="checkout-summary-copy">
+                    <small>
+                      {item.product.team || 'NEPKITS'} · SIZE {item.size}
+                    </small>
+                    <strong>{item.product.name}</strong>
+                    <span>{money(item.product.price || 0)} each</span>
+                  </div>
+                  <b>{money(Number(item.product.price) * item.quantity)}</b>
+                </article>
+              ))}
+            </div>
+
+            <div className="checkout-summary-lines">
+              <div>
+                <span>SUBTOTAL</span>
+                <strong>{money(subtotal)}</strong>
+              </div>
+              <div>
+                <span>DELIVERY</span>
+                <strong>
+                  {selectedZone ? money(selectedZone.delivery_fee) : 'SELECT ZONE'}
+                </strong>
+              </div>
+              <div className="checkout-summary-total">
+                <span>ITEM TOTAL</span>
+                <strong>{money(subtotal)}</strong>
+              </div>
+            </div>
+
+            <div className="checkout-summary-note">
+              <span>✓</span>
+              <div>
+                <strong>READY FOR MATCHDAY</strong>
+                <small>Your final delivery and promotion rules are confirmed server-side when the order is placed.</small>
+              </div>
+            </div>
 
             <button
               type="button"
-              className="place-order"
+              className="checkout-place-button"
               disabled={busy}
               onClick={placeOrder}
             >
               {busy ? 'CREATING ORDER…' : 'PLACE ORDER'}
+              <span>→</span>
             </button>
+
+            <Link href="/shop" className="checkout-continue-link">
+              CONTINUE SHOPPING
+            </Link>
+
+            <div className="checkout-legal">
+              By placing this order, you confirm your delivery and payment details.
+            </div>
           </aside>
         </div>
       </div>
