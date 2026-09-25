@@ -44,7 +44,7 @@ export default function LoginPage(){
 
   <section className='modern-auth-panel'>
    <div className='auth-panel-top'>
-    <Link href='/' className='auth-brand'><span className='auth-brand-frame'><img src='https://raw.githubusercontent.com/webdesign-only/nepkits-hub/main/public/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
+    <Link href='/' className='auth-brand'><span className='auth-brand-frame'><img src='/nepkits-logo.webp' alt='NEPKITS HUB'/></span></Link>
     <Link href='/shop' className='auth-shop-link'>CONTINUE SHOPPING →</Link>
    </div>
 
