@@ -139,3 +139,21 @@ body{background:var(--market-bg);color:var(--market-text)}
 @keyframes authSpin{to{transform:rotate(360deg)}}
 @media(max-width:900px){.modern-auth{grid-template-columns:1fr}.auth-hero-panel{min-height:420px}.auth-hero-copy{left:28px;right:28px;bottom:65px}.auth-hero-copy h1{font-size:65px}.auth-hero-bottom{left:28px;right:28px}.modern-auth-panel{min-height:0}.auth-form-wrap{padding:40px 0}}
 @media(max-width:560px){.auth-hero-panel{min-height:350px}.auth-hero-top{left:18px;right:18px;top:18px}.auth-hero-top span:last-child{display:none}.auth-hero-copy{left:20px;right:20px;bottom:52px}.auth-hero-copy h1{font-size:52px}.auth-hero-copy p{font-size:11px}.auth-hero-bottom{left:20px;right:20px;bottom:17px;font-size:7px}.auth-panel-top{padding:17px 18px}.auth-brand-frame{width:112px;height:42px}.auth-form-wrap{width:calc(100% - 36px);padding:32px 0}.auth-form-wrap h2{font-size:36px}.auth-trust-row{grid-template-columns:1fr}}
+
+
+/* COMPACT LOGIN POPUP */
+.market-account-button{border:0;background:transparent;color:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;cursor:pointer}
+.market-account-button span{font-size:17px;line-height:1}.market-account-button b{font-size:9px}
+.login-popover-backdrop{position:fixed;z-index:9999;inset:0;background:rgba(12,12,12,.58);backdrop-filter:blur(5px);display:grid;place-items:center;padding:20px;animation:loginFade .18s ease}
+.login-popover{position:relative;width:min(390px,100%);background:#fff;border-radius:6px;box-shadow:0 24px 80px rgba(0,0,0,.3);padding:28px 30px 24px;color:#171717}
+.login-popover-close{position:absolute;right:12px;top:8px;width:30px;height:30px;border:0;background:transparent;color:#777;font-size:25px;line-height:1;cursor:pointer}
+.login-popover-brand{display:flex;width:126px;height:42px;border:1px solid #e5e5e5;padding:4px 10px;align-items:center;justify-content:center;margin:0 auto 20px}.login-popover-brand img{width:100%;height:100%;object-fit:contain}
+.login-popover-tabs{display:grid;grid-template-columns:1fr 1fr;background:#f3f3f3;padding:3px;border-radius:3px;margin-bottom:18px}.login-popover-tabs button{border:0;background:transparent;padding:9px;font-size:8px;font-weight:900;letter-spacing:.08em;color:#777;cursor:pointer}.login-popover-tabs button.active{background:#fff;color:#111;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.login-popover-title{font:900 30px/.95 'Barlow Condensed';letter-spacing:-.02em}.login-popover-sub{font-size:9px;color:#777;margin:7px 0 15px;line-height:1.5}
+.login-popover-input{width:100%;height:43px;border:1px solid #ddd;border-radius:2px;padding:0 11px;font-size:10px;outline:none;margin-top:8px;background:#fff;box-sizing:border-box}.login-popover-input:focus{border-color:var(--market-orange);box-shadow:0 0 0 3px rgba(248,86,6,.08)}
+.login-popover-password{position:relative}.login-popover-password .login-popover-input{padding-right:52px}.login-popover-password>button{position:absolute;right:0;bottom:0;width:50px;height:43px;border:0;background:transparent;color:#777;font-size:7px;font-weight:900;cursor:pointer}
+.login-popover-error{margin-top:9px;padding:8px 9px;background:#fff2ed;border-left:3px solid var(--market-orange);color:#a54b26;font-size:8px;line-height:1.4}
+.login-popover-submit{width:100%;height:44px;margin-top:14px;border:0;border-radius:2px;background:var(--market-orange);color:#fff;font-size:9px;font-weight:900;letter-spacing:.1em;cursor:pointer}.login-popover-submit:disabled{opacity:.65}
+.login-popover-foot{text-align:center;margin-top:15px;color:#888;font-size:8px}.login-popover-foot button{border:0;background:none;color:#222;text-decoration:underline;font-size:8px;font-weight:900;cursor:pointer}
+@keyframes loginFade{from{opacity:0}to{opacity:1}}
+@media(max-width:560px){.login-popover{padding:25px 20px 21px}.login-popover-title{font-size:27px}}
