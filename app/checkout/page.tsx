@@ -94,6 +94,8 @@ export default function Checkout() {
   );
 
   const selectedZone = zones.find((zone) => zone.id === zoneId);
+  const deliveryFee = Number(selectedZone?.delivery_fee || 0);
+  const estimatedTotal = subtotal + deliveryFee;
 
   async function placeOrder() {
     setError('');
@@ -131,9 +133,9 @@ export default function Checkout() {
       },
     );
 
-    if (orderError) {
+    if (orderError || !order?.id) {
       setBusy(false);
-      setError(orderError.message);
+      setError(orderError?.message || 'The order could not be created. Please try again.');
       return;
     }
 
