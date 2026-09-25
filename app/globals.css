@@ -337,3 +337,58 @@ html,body{overflow-x:hidden}
   .mobile-bottom-nav .market-account-button b{font-size:6px}
 }
 @media(min-width:768px){.mobile-bottom-nav{display:none}}
+
+
+/* NEPKITS SIGNATURE THEME — brand colors only */
+:root{
+  --black:#0b0b0c;
+  --ink:#151515;
+  --paper:#f7f5ef;
+  --white:#fff;
+  --red:#e31b23;
+  --red2:#ad1118;
+  --muted:#77736b;
+  --line:#d9d4ca;
+  --market-orange:#e31b23;
+  --market-orange-dark:#ad1118;
+  --market-bg:#f7f5ef;
+  --market-card:#fff;
+  --market-text:#151515;
+  --market-muted:#77736b;
+  --market-line:#ddd7cd;
+  --market-green:#2e7d5b;
+  --nepkits-gold:#d8a93c;
+}
+.market-top{background:#111214;color:#f7f5ef}
+.market-main{background:#e31b23}
+.market-logo-frame,.market-main .market-logo-frame{background:#fff;border-color:rgba(255,255,255,.7)}
+.market-search button{background:#f7e3e4;color:#ad1118}
+.market-nav .all-cat{background:#111214}
+.market-nav .all-cat:hover{background:#ad1118}
+.market-nav a:hover,.home-category-panel a:hover,.market-section-head>a,.shop-empty a,.filter-group button.active,.filter-group button:hover,.cart-market-name:hover,.cart-market-actions>button:hover,.cart-market-actions>a:hover{color:#e31b23}
+.market-hero-copy h1 em{color:#f0c45d}
+.hero-deal-stack span,.service-strip b,.market-price-row>span,.market-add{color:#e31b23}
+.discount-tag,.market-add:hover,.market-hero-btn,.market-cta-btn,.primary-wide,.floating-sale,.size-options button.selected,.cart-checkout-btn,.cart-primary-btn,.modern-auth-submit,.login-popover-submit{background:#e31b23;border-color:#e31b23}
+.new-tag{background:#2e7d5b}
+.product-detail,.bag-page,.checkout-page,.account-page,.orders-page,.market-shop{background:#f7f5ef !important}
+.cart-delivery-banner{background:#fff4e3;border-color:#ecd39a}
+.cart-empty-icon{background:#fff1d1}
+.site-loader{background:#e31b23}
+.mobile-market-bar{background:#e31b23}
+.mobile-search button{color:#e31b23}
+.modern-field input:focus,.login-popover-input:focus{border-color:#e31b23;box-shadow:0 0 0 3px rgba(227,27,35,.10)}
+.auth-form-kicker{color:#e31b23}
+.auth-message,.login-popover-error{border-left-color:#e31b23}
+.login-popover-submit:hover,.modern-auth-submit:hover{background:#ad1118}
+.market-cta{background:#111214}
+.market-cta em{color:#e31b23}
+.market-home{background:#f7f5ef}
+.market-section.gray{background:#ebe8e0}
+.panel-title,.filter-head,.shop-toolbar,.market-card,.service-strip,.home-category-panel,.hero-deal-stack>div,.cart-market-item,.cart-market-summary,.cart-empty-market{border-color:#ddd7cd}
+.product-tile-copy small,.market-team,.shop-heading span,.shop-breadcrumb{color:#77736b}
+.mobile-cats a{border-color:rgba(255,255,255,.42)}
+@media(max-width:767px){
+  .mobile-market-top{background:#e31b23}
+  .mobile-bottom-nav{background:#111214}
+  .mobile-bottom-nav .market-cart-count{background:#e31b23}
+}
