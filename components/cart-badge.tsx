@@ -1,8 +1,31 @@
 'use client';
-import {useEffect,useState} from 'react';
-export default function CartBadge(){
- const [count,setCount]=useState(0);
- const read=()=>{try{const items=JSON.parse(localStorage.getItem('nepkits-cart')||'[]');setCount(items.reduce((n:any,i:any)=>n+Number(i.quantity||0),0))}catch{setCount(0)}};
- useEffect(()=>{read();const onUpdate=()=>read();window.addEventListener('storage',onUpdate);window.addEventListener('nepkits:cart',onUpdate);return()=>{window.removeEventListener('storage',onUpdate);window.removeEventListener('nepkits:cart',onUpdate)}},[]);
- return <span className='market-cart-count' aria-label={count+' items in cart'}>{count}</span>;
+
+import { useEffect, useState } from 'react';
+import { readCart } from '../lib/cart';
+
+function getCount() {
+  return readCart().reduce((total, item) => total + Number(item.quantity || 0), 0);
+}
+
+export default function CartBadge() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const refresh = () => setCount(getCount());
+
+    refresh();
+    window.addEventListener('storage', refresh);
+    window.addEventListener('nepkits:cart', refresh);
+
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('nepkits:cart', refresh);
+    };
+  }, []);
+
+  return (
+    <span className="market-cart-count" aria-label={`${count} items in cart`}>
+      {count}
+    </span>
+  );
 }
