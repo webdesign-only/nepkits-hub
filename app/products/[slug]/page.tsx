@@ -50,7 +50,7 @@ export default function ProductPage() {
   const canAdd = Boolean(selectedSize && Number(selectedSize.stock_qty) > 0);
 
   function handleAddToCart() {
-    if (!canAdd || !selectedSize) return;
+    if (!product || !canAdd || !selectedSize) return;
 
     addToCart(product, size, quantity);
     window.dispatchEvent(new Event('nepkits:open-cart'));
