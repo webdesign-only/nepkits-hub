@@ -1,1 +1,17 @@
-'use client';import Link from'next/link';import{addToCart,formatNpr}from'../lib/cart';import type{Product}from'../lib/types';export default function ProductCard({product}:{product:Product}){const add=()=>{const size=product.sizes[0];if(!size||product.stock<1)return;addToCart(product,size);window.location.href='/checkout'};return <article className="card"><Link href={'/products/'+product.slug} className="card-image"><img src={product.image} alt={product.name}/>{product.compareAt&&<b>{Math.round(100-product.price/product.compareAt*100)}% OFF</b>}</Link><div className="card-body"><span>{product.team} · {product.season}</span><Link href={'/products/'+product.slug}><h3>{product.name}</h3></Link><small>★ {product.rating.toFixed(1)} · {product.sold} sold</small><div className="price"><strong>{formatNpr(product.price)}</strong>{product.compareAt&&<del>{formatNpr(product.compareAt)}</del>}</div><button onClick={add}>{product.stock<1?'SOLD OUT':'ADD TO CART'}</button></div></article>}
+'use client';
+import Link from 'next/link';
+import {addToCart,formatNpr} from '../lib/cart';
+import type {Product} from '../lib/types';
+
+export default function ProductCard({product}:{product:Product}){
+  const add=()=>{
+    const size=product.sizes[0];
+    if(!size||product.stock<1)return;
+    addToCart(product,size);
+    window.dispatchEvent(new Event('nepkits:open-cart'));
+  };
+  return <article className="card">
+    <Link href={'/products/'+product.slug} className="card-image"><img src={product.image} alt={product.name}/>{product.compareAt&&<b>{Math.round(100-product.price/product.compareAt*100)}% OFF</b>}</Link>
+    <div className="card-body"><span>{product.team} · {product.season}</span><Link href={'/products/'+product.slug}><h3>{product.name}</h3></Link><small>★ {product.rating.toFixed(1)} · {product.sold} sold</small><div className="price"><strong>{formatNpr(product.price)}</strong>{product.compareAt&&<del>{formatNpr(product.compareAt)}</del>}</div><button onClick={add}>{product.stock<1?'SOLD OUT':'ADD TO CART'}</button></div>
+  </article>;
+}
