@@ -29,7 +29,7 @@ export default function MarketHeader(){
           </form>
           <div className="market-actions">
             <button type="button" onClick={()=>setLogin(true)}><span>◯</span><b>Account</b></button>
-            <Link href="/orders"><span>↗</span><b>Orders</b></Link>
+            <Link href="/account"><span>↗</span><b>Orders</b></Link>
             <button type="button" onClick={()=>window.dispatchEvent(new Event('nepkits:open-cart'))}><span>🛒</span><b>Cart</b><em>{count}</em></button>
           </div>
         </div>
