@@ -5,7 +5,7 @@ export type CartProduct = {
   slug?: string;
   name?: string;
   price?: number | string;
-  team?: string;
+  team?: string | null;
   images?: Array<{ url?: string; is_primary?: boolean }>;
 };
 
