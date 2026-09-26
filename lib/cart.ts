@@ -1,64 +1,7 @@
-import { STORE } from './config';
-
-export type CartProduct = {
-  id: string;
-  slug?: string;
-  name?: string;
-  price?: number | string;
-  team?: string | null;
-  images?: Array<{ url?: string; is_primary?: boolean }>;
-};
-
-export type CartItem = {
-  product: CartProduct;
-  size: string;
-  quantity: number;
-};
-
-export function readCart(): CartItem[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const parsed = JSON.parse(localStorage.getItem(STORE.cartKey) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-export function writeCart(items: CartItem[]) {
-  localStorage.setItem(STORE.cartKey, JSON.stringify(items));
-  window.dispatchEvent(new Event('nepkits:cart'));
-}
-
-export function addToCart(product: CartProduct, size: string, quantity = 1) {
-  const items = readCart();
-  const index = items.findIndex((item) => item.product.id === product.id && item.size === size);
-
-  if (index === -1) {
-    items.push({ product, size, quantity });
-  } else {
-    items[index] = { ...items[index], quantity: items[index].quantity + quantity };
-  }
-
-  writeCart(items);
-}
-
-export function removeFromCart(index: number) {
-  const items = readCart();
-  writeCart(items.filter((_, itemIndex) => itemIndex !== index));
-}
-
-export function updateCartQuantity(index: number, quantity: number) {
-  const items = readCart();
-  if (!items[index]) return;
-  items[index] = { ...items[index], quantity: Math.max(1, quantity) };
-  writeCart(items);
-}
-
-export function clearCart() {
-  writeCart([]);
-}
-
-export function cartSubtotal(items: CartItem[]) {
-  return items.reduce((total, item) => total + Number(item.product.price || 0) * item.quantity, 0);
-}
+import type{CartItem,Product}from'./types';
+const KEY='nepkits-v2-cart';
+export const readCart=():CartItem[]=>{if(typeof window==='undefined')return[];try{const v=JSON.parse(localStorage.getItem(KEY)??'[]');return Array.isArray(v)?v:[]}catch{return[]}};
+const writeCart=(items:CartItem[])=>{localStorage.setItem(KEY,JSON.stringify(items));window.dispatchEvent(new Event('nepkits:cart'))};
+export const addToCart=(product:Product,size:string,quantity=1)=>{const items=readCart();const i=items.findIndex(x=>x.product.id===product.id&&x.size===size);if(i<0)items.push({product,size,quantity});else items[i]={...items[i],quantity:items[i].quantity+quantity};writeCart(items)};
+export const updateQuantity=(i:number,q:number)=>{const items=readCart();if(!items[i])return;items[i]={...items[i],quantity:Math.max(1,q)};writeCart(items)};
+export const removeItem=(i:number)=>writeCart(readCart().filter((_,n)=>n!==i));export const clearCart=()=>writeCart([]);export const subtotal=(items:CartItem[])=>items.reduce((s,x)=>s+x.product.price*x.quantity,0);export const formatNpr=(v:number)=>'NPR '+v.toLocaleString('en-NP');
