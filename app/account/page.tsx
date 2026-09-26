@@ -1,5 +1,1 @@
-import AccountPageClient from './account-page-client';
-
-export default function AccountPage(){
-  return <AccountPageClient/>;
-}
+import Link from'next/link';export default function Account(){return <main className="not-found"><span>NEPKITS HUB</span><h1>ACCOUNT</h1><p>Account services are being rebuilt with the new storefront.</p><Link href="/shop" className="primary">CONTINUE SHOPPING →</Link></main>}
